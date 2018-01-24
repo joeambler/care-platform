@@ -1,0 +1,25 @@
+{
+  "name": "care-platform",
+  "version": "0.0.0",
+  "description": "Care platform to enable assisted living.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"no test\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joeambler/care-platform.git"
+  },
+  "keywords": [
+    "care",
+    "platform",
+    "assisted",
+    "living"
+  ],
+  "author": "Joey Ambler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joeambler/care-platform/issues"
+  },
+  "homepage": "https://github.com/joeambler/care-platform#readme"
+}
