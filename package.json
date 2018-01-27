@@ -4,7 +4,8 @@
   "description": "Care platform to enable assisted living.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"no test\" && exit 1"
+    "test": "echo \"no test\" && exit 1",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
