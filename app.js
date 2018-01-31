@@ -17,7 +17,6 @@ var hashPromise = bcrypt.hash(pwd, saltRounds);
 var keyPromise = bcrypt.hash(email + date.getMilliseconds(), saltRounds);
 
 Promise.all([namePromise, hashPromise, keyPromise]).then(([name, hash, key]) => {
-
     var userPromise = models.User.create({
         email: email,
         passwordHash: hash,
@@ -32,6 +31,29 @@ Promise.all([namePromise, hashPromise, keyPromise]).then(([name, hash, key]) => 
         user.addClient(client, { through: {admin: true, tentative: false}}).then(user =>
         models.User.findOne({
             include:  [ models.Name, {model: models.Client, as: 'Clients', include: models.Name}]
-        }).then(user => console.log(user.Clients[0].Name.title)));
+        }).then(user => {console.log(user.Clients[0].Name.title); passwordResetTest(user);}));
     });
 });
+
+function passwordResetTest (user){
+    var now = new Date();
+    var expiry = now.setDate(now.getHours() + 2);
+    console.log(expiry);
+
+    models.PasswordResetCode.destroy({
+        where: {
+            userId: user.id
+        }
+    });
+
+    var randomstring = require("randomstring");
+    var code = randomstring.generate();
+
+    var hashPromise = bcrypt.hash(code, saltRounds).then((hash) => {
+        models.PasswordResetCode.create({
+            expiryTime: expiry,
+            resetCodeHash: hash,
+            userId: user.id
+        });
+    });
+}

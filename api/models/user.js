@@ -14,8 +14,9 @@ module.exports = (sequelize, DataTypes) => {
 
     User.associate = function (models) {
         console.log("!");
-        User.belongsTo(models.Name, {foreignKey:{
-            name : 'nameId',
+        User.belongsTo(models.Name, {
+            foreignKey: {
+                name: 'nameId',
                 notNull: true
             }
         });

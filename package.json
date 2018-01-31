@@ -25,6 +25,8 @@
   "homepage": "https://github.com/joeambler/care-platform#readme",
   "dependencies": {
     "bcrypt": "^1.0.3",
+    "mysql2": "^1.5.1",
+    "randomstring": "^1.1.5",
     "sequelize": "^4.32.2"
   }
 }
