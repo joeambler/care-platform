@@ -1,0 +1,589 @@
+openapi: 3.0.0
+servers:
+  - url: 'https://cp/v0'
+info:
+  description: This is the API definition for the Care Platform.
+  version: "0.0.0"
+  title: Care Platform
+  contact:
+    email: ja14689@my.bristol.ac.uk
+tags:
+  - name: user
+    description: User accounts which can be used to manage client data
+  - name: client
+    description: Information on the person whose home is connected to the platform
+paths:
+  /users:
+    post:
+      tags:
+        - user
+      summary: Create a new user
+      description: >-
+        Create a new user with only basic details which can be later associated
+        with a client
+      operationId: addUser
+      responses:
+        '200':
+          description: Successfully created
+        '401':
+          description: >-
+            You have not logged in or an invalid or expired token has been
+            supplied
+        '406':
+          description: Invalid password supplied
+      requestBody:
+        $ref: '#/components/requestBodies/UserWithPassword'
+
+  /users/me:
+    put:
+      tags:
+        - user
+      summary: Update your own user account once authenticated
+      description: >-
+        Update basic details of your own user including, name, email address and
+        password. Information for fields which should not be updated should not 
+        be supplied.
+      operationId: updateUser
+      responses:
+        '200':
+          description: Successfully updated
+        '401':
+          description: >-
+            You have not logged in or an invalid or expired token has been
+            supplied
+        '406':
+          description: The input is not valid
+      requestBody:
+        $ref: '#/components/requestBodies/UserWithPassword'
+      security:
+        - userAuth: []
+        
+    get:
+      tags:
+        - user
+      summary: Get your own details on the platform
+      description: >-
+        Get basic details of your own user including, name, email address and
+        password.
+      operationId: updateUser
+      responses:
+        '200':
+          description: OK
+          content: 
+          $ref: '#/components/requestBodies/User'
+        '401':
+          description: >-
+            You have not logged in or an invalid or expired token has been
+            supplied
+      security:
+        - userAuth: []
+    
+    delete:
+      tags:
+        - user
+      summary: Delete your own user account once authenticated
+      description: >-
+        Delete your own user account. If you are the last user associated with a
+        client, that client will also be deleted. You will need to be
+        authenticated and provide your password in the body of the request to
+        confirm the deletion.
+      operationId: deleteUser
+      responses:
+        '200':
+          description: Successfully deleted
+        '401':
+          description: >-
+            You have not logged in or an invalid or expired token has been
+            supplied
+        '406':
+          description: Invalid password supplied
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      security:
+        - userAuth: []
+        
+  /users/login:
+    post:
+      tags:
+        - user
+      summary: User login
+      description: >-
+        Log in with your email address and password and obtain an 
+        authorization token
+      operationId: "loginUser"
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+          $ref: '#/components/requestBodies/JWT'
+        '401':
+          description: Invalid credentials supplied
+        '404':
+          description: User does not exist
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+        
+  /users/passwordResetEmail:
+    post:
+      tags:
+        - user
+      summary: Send a password recovery email
+      description: >-
+        Specify email address to send a password reset email to the email 
+        address of a registered user.
+      operationId: "passwordReset"
+      responses:
+        '200':
+          description: Email Sent
+        '401':
+          description: Invalid credentials supplied
+        '404':
+          description: User does not exist
+      requestBody:
+        $ref: '#/components/requestBodies/Email'
+        
+  /users/passwordReset:
+    post:
+      tags:
+        - user
+      summary: >-
+        Change your password using a temporary password reset code
+      description: >-
+        Using your email address, and temporary password reset code, provide a new password for your account.
+      operationId: "passwordReset"
+      responses:
+        '200':
+          description: User account updated
+        '401':
+          description: Invalid password reset code
+        '404':
+          description: User does not exist
+      requestBody:
+        $ref: '#/components/requestBodies/PasswordReset'
+        
+  /users/me/clients:
+    post:
+      tags:
+        - client
+        - user
+      summary: Create a new client associated with your account
+      description: >-
+        The new user created from the information provided will be initially 
+        associated with your account.
+      operationId: "createClient"
+      responses:
+        '201':
+          description: Client was successfully created
+          content:
+          $ref: '#/components/requestBodies/ClientWithID'
+        '401':
+          description: You aren't authorised to make this change
+        '406':
+          description: The data provided is not correct
+      requestBody:
+        $ref: '#/components/requestBodies/Client'
+      security:
+        - userAuth: []
+        
+    get:
+      tags:
+        - client
+        - user
+      summary: Get the clients associated with your account
+      description: >-
+        Get all clients that are associated with your user account.
+      operationId: "getUsersClients"
+      responses:
+        '200':
+          description: OK
+          content:
+          $ref: '#/components/requestBodies/ClientList'
+        '401':
+          description: You aren't authorised to make this request
+        '204':
+          description: There are no clients associated with your account
+      security:
+        - userAuth: []
+
+  /users/me/clients/{clientID}:
+    delete:
+      tags:
+        - client
+      summary: Remove client from user account
+      description: >-
+        Remove the link between your account and the client specified in 
+        the clientID. If you are the last user for the client, the client will
+        also be deleted. You will need to provide your user credentials for this
+        request.
+      operationId: "deleteUserClient"
+      parameters:
+        - name: clientID
+          in: path
+          description: ID of client to remove from account
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Deleted
+        '401':
+          description: You aren't authorised to make this request
+        '404':
+          description: >-
+            There is no client with this ID or you do not have permission to access it.
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      security:
+        - userAuth: []
+        
+  /clients/{clientID}:
+    get:
+      tags:
+        - client
+      summary: Get client information by ID
+      description: >-
+        Get client information by ID passed in path
+      operationId: "getClients"
+      parameters:
+        - name: clientID
+          in: path
+          description: ID of client to get
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+          $ref: '#/components/requestBodies/ClientWithID'
+        '401':
+          description: You aren't authorised to make this request
+        '404':
+          description: >-
+            There is no client with this ID or you do not have permission to access it.
+      security:
+        - userAuth: []
+    put:
+      tags:
+        - client
+      summary: Update the information associated with a client.
+      description: >-
+        Update basic details of the client, such as their name. 
+        Information for fields which should not be updated should not be 
+        supplied.
+      operationId: "updateClient"
+      parameters:
+        - name: clientID
+          in: path
+          description: ID of client to get
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Client was successfully updated
+          content:
+          $ref: '#/components/requestBodies/ClientWithID'
+        '401':
+          description: You aren't authorised to make this change
+        '406':
+          description: The data provided is not correct
+      requestBody:
+        $ref: '#/components/requestBodies/Client'
+      security:
+        - userAuth: []
+
+    delete:
+      tags:
+        - client
+      summary: Delete client by ID
+      description: >-
+        Delete client with ID passed in path. You will need to provide your user
+        credentials with this request.
+      operationId: "deleteClient"
+      parameters:
+        - name: clientID
+          in: path
+          description: ID of client to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Deleted
+        '401':
+          description: You aren't authorised to make this request
+        '404':
+          description: >-
+            There is no client with this ID or you do not have permission to access it.
+      requestBody:
+        $ref: '#/components/requestBodies/Credentials'
+      security:
+        - userAuth: []
+
+  /clients/{clientID}/share:
+    post:
+      tags:
+        - client
+      summary: Invite user to access the client's data
+      description: >-
+        Specify an existing user's email address to send an invitation to for 
+        them to manage the client.
+      operationId: "shareClient"
+      parameters:
+        - name: clientID
+          in: path
+          description: ID of client to get
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User was invited to manage this client.
+        '401':
+          description: Invalid credentials supplied
+        '404':
+          description: The client or user does not exist.
+      requestBody:
+        $ref: '#/components/requestBodies/Invitation'
+      security:
+        - userAuth: []
+
+components:
+  schemas:
+    Credentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+        password:
+          type: string
+          example: password
+          
+    PasswordReset:
+      type: object
+      required:
+        - email
+        - code
+        - newPassword
+      properties:
+        email:
+          $ref: '#/components/schemas/Email'
+        code:
+          type: string
+          example: SA92JS9a029384JASKJN
+        newPassword:
+          type: string
+          example: password
+          
+    Name:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Dr
+        firstnames:
+          type: string
+          example: Grace
+        surnames:
+          type: string
+          example: Hopper
+          
+    Email: 
+      type: string
+      example: carer@example.com
+
+    Invitation: 
+      type: object
+      required:
+        - email
+        - admin
+      properties:
+        email: 
+          $ref: '#/components/schemas/Email'
+        admin:
+          type: boolean
+          example: false
+          
+    UserWithPassword:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        email: 
+          $ref: '#/components/schemas/Email'
+        password:
+          type: string
+          example: password
+
+    Client:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+
+    ClientWithID:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          $ref: '#/components/schemas/Name'
+          
+    User:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+        email:
+          $ref: '#/components/schemas/Email'
+          
+    JWT:
+      type: object
+      properties:
+        token: 
+          type: string
+          description: JSON Web Token
+          example: >-
+            eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im9sYXR1
+            bmRlZ2FydWJhQGdtYWlsLmNvbSIsImZ1bGxOYW1lIjoiT2xhdHVuZGUgR
+            2FydWJhIiwiX2lkIjoiNThmMjYzNDdiMTY1YzUxODM1NDMxYTNkIiwiaW
+            F0IjoxNDkyMjgwMTk4fQ.VcMpybz08cB5PsrMSr25En4_EwCGWZVFgciO
+            4M-3ENE
+
+  requestBodies:
+    User:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/User'
+      description: New user details
+      required: true
+      
+    PasswordReset:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PasswordReset'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/PasswordReset'
+      description: New user details
+      required: true
+      
+    UserWithPassword:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserWithPassword'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/UserWithPassword'
+      description: New user details
+      required: true
+    
+    Credentials:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Credentials'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Credentials'
+      description: Credentials Pair
+      required: true
+      
+    Email:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                $ref: '#/components/schemas/Email'
+        application/xml:
+          schema:
+            type: object
+            properties:
+              email:
+                $ref: '#/components/schemas/Email'
+      description: Email address for an exisiting user
+      required: true
+      
+    JWT:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/JWT'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/JWT'
+      description: JSON Web Token
+      required: true
+
+    Invitation:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Invitation'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Invitation'
+      description: JSON Web Token
+      required: true
+
+    Client: 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Client'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Client'
+      description: New client details
+      required: true
+
+    ClientList: 
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClientWithID'
+        application/xml:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClientWithID'
+      description: Client object
+      required: true
+      
+    ClientWithID: 
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ClientWithID'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/ClientWithID'
+      description: Client object
+      required: true
+            
+  securitySchemes:
+    userAuth:            # authentication for users
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # using JSON Web Tokens

@@ -9,11 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         passwordHash: {
             type: DataTypes.STRING,
             allowNull: false,
-        },
-        canAddModules: {
-            type: DataTypes.BOOLEAN,
-            defaultValue: false,
-        },
+        }
     });
 
     User.associate = function (models) {
@@ -24,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         });
         User.belongsToMany(models.Client, {
-            through: 'UserClient',
+            through: models.UserClient,
             as: 'Clients',
             foreignkey: 'ClientId'
         });

@@ -29,7 +29,7 @@ Promise.all([namePromise, hashPromise, keyPromise]).then(([name, hash, key]) => 
     });
 
     Promise.all([userPromise, clientPromise]).then(function ([user, client]) {
-        user.addClient(client).then(user =>
+        user.addClient(client, { through: {admin: true, tentative: false}}).then(user =>
         models.User.findOne({
             include:  [ models.Name, {model: models.Client, as: 'Clients', include: models.Name}]
         }).then(user => console.log(user.Clients[0].Name.title)));

@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         });
         Client.belongsToMany(models.User, {
-            through: 'UserClient',
+            through: models.UserClient,
             as: 'Users',
             forignkey: 'UserId'
         });
