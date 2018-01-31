@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Client.associate = function (models) {
         Client.belongsTo(models.Name, {
+            as: "name",
             foreignKey: {
                 name: 'nameId',
                 allowNull: true
@@ -18,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         Client.belongsToMany(models.User, {
             through: models.UserClient,
             as: 'Users',
-            forignkey: 'userId'
+            foreignKey: 'userId'
         });
     };
     return Client;

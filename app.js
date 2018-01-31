@@ -28,17 +28,16 @@ Promise.all([namePromise, hashPromise, keyPromise]).then(([name, hash, key]) => 
     });
 
     Promise.all([userPromise, clientPromise]).then(function ([user, client]) {
-        user.addClient(client, { through: {admin: true, tentative: false}}).then(user =>
-        models.User.findOne({
-            include:  [ models.Name, {model: models.Client, as: 'Clients', include: models.Name}]
-        }).then(user => {console.log(user.Clients[0].Name.title); passwordResetTest(user);}));
+        passwordResetTest(user);
+        user.addClient(client, { through: {admin: true, tentative: false}}).then(() => {
+            user.getClients().then(clients => clients[0].getName().then(name => console.log(name.firstNames)));
+        });
     });
 });
 
 function passwordResetTest (user){
     var now = new Date();
     var expiry = now.setDate(now.getHours() + 2);
-    console.log(expiry);
 
     models.PasswordResetCode.destroy({
         where: {
@@ -49,7 +48,7 @@ function passwordResetTest (user){
     var randomstring = require("randomstring");
     var code = randomstring.generate();
 
-    var hashPromise = bcrypt.hash(code, saltRounds).then((hash) => {
+    bcrypt.hash(code, saltRounds).then((hash) => {
         models.PasswordResetCode.create({
             expiryTime: expiry,
             resetCodeHash: hash,

@@ -13,7 +13,6 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.associate = function (models) {
-        console.log("!");
         User.belongsTo(models.Name, {
             foreignKey: {
                 name: 'nameId',
@@ -23,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
         User.belongsToMany(models.Client, {
             through: models.UserClient,
             as: 'Clients',
-            foreignkey: 'clientId'
+            foreignKey: 'clientId'
         });
     };
 
