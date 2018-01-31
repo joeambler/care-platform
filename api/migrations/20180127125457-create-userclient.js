@@ -3,7 +3,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
       return queryInterface.createTable('UserClients', {
-          UserId: {
+          userId: {
               type: Sequelize.INTEGER,
               notNull: true,
               references: {
@@ -19,7 +19,7 @@ module.exports = {
               allowNull: false,
               type: Sequelize.DATE
           },
-          ClientId: {
+          clientId: {
               type: Sequelize.INTEGER,
               notNull: true,
               references: {
@@ -39,7 +39,7 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-      return queryInterface.dropTable('UserClient');
+      return queryInterface.dropTable('UserClients');
 
   }
 };
