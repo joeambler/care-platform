@@ -1,4 +1,4 @@
-var models = require('./api/models');
+var models = require('./models');
 var bcrypt = require('bcrypt');
 
 var pwd = "password";
