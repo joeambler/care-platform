@@ -33,7 +33,7 @@ node_modules
 # Runtime configuration for swagger app
 config/runtime.yaml
 
-api/config
+config/config.json
 *log
 node_modules
 .idea/
