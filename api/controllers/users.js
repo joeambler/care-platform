@@ -5,7 +5,13 @@ var models = require('../../models');
 var bcrypt = require('bcrypt');
 
 module.exports = {
-    createUser: createUser
+    createUser: createUser,
+    getUser: getUser,
+    updateUser: updateUser,
+    deleteUser: deleteUser,
+    loginUser: loginUser,
+    sendPasswordResetEmail: sendPasswordResetEmail,
+    usePasswordResetCode: usePasswordResetCode
 };
 
 
@@ -48,3 +54,26 @@ function createUser(req, res) {
     });
 }
 
+function getUser(req, res){
+
+}
+
+function updateUser(req, res){
+
+}
+
+function deleteUser(req, res){
+
+}
+
+function loginUser(req, res){
+
+}
+
+function sendPasswordResetEmail(req, res){
+
+}
+
+function usePasswordResetCode(req, res){
+
+}

@@ -48,12 +48,14 @@ paths:
 
       
   /users/me:
+    x-swagger-router-controller: users
+  
     get:
       description: Get basic details of your own user including, name, email address and password.
       summary: Get your own details on the platform
       tags:
       - user
-      operationId: UsersMeGet
+      operationId: getUser
       produces:
       - application/json
       parameters: []
@@ -70,7 +72,7 @@ paths:
       summary: Update your own user account once authenticated
       tags:
       - user
-      operationId: UsersMePut
+      operationId: updateUser
       produces:
       - application/json
       parameters:
@@ -93,7 +95,7 @@ paths:
       summary: Delete your own user account once authenticated
       tags:
       - user
-      operationId: UsersMeDelete
+      operationId: deleteUser
       produces:
       - application/json
       parameters:
@@ -112,12 +114,14 @@ paths:
           description: Invalid password supplied
       
   /users/login:
+    x-swagger-router-controller: users
+  
     post:
       description: Log in with your email address and password and obtain an  authorization token
       summary: User login
       tags:
       - user
-      operationId: UsersLoginPost
+      operationId: loginUser
       produces:
       - application/json
       parameters:
@@ -138,12 +142,14 @@ paths:
           description: User does not exist
       
   /users/passwordResetEmail:
+    x-swagger-router-controller: users
+  
     post:
       description: Specify email address to send a password reset email to the email  address of a registered user.
       summary: Send a password recovery email
       tags:
       - user
-      operationId: UsersPasswordResetEmailPost
+      operationId: sendPasswordResetEmail
       produces:
       - application/json
       parameters:
@@ -162,12 +168,13 @@ paths:
           description: User does not exist
       
   /users/passwordReset:
+    x-swagger-router-controller: users
     post:
       description: Using your email address, and temporary password reset code, provide a new password for your account.
       summary: Change your password using a temporary password reset code
       tags:
       - user
-      operationId: UsersPasswordResetPost
+      operationId: usePasswordResetCode
       produces:
       - application/json
       parameters:
