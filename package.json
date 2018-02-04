@@ -4,8 +4,8 @@
   "description": "Care platform to enable assisted living.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"no test\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "swagger project test"
   },
   "repository": {
     "type": "git",
@@ -23,10 +23,20 @@
     "url": "https://github.com/joeambler/care-platform/issues"
   },
   "homepage": "https://github.com/joeambler/care-platform#readme",
+  "devDependencies": {
+    "should": "^7.1.0",
+    "supertest": "^1.0.0"
+  },
   "dependencies": {
     "bcrypt": "^1.0.3",
+    "express": "^4.12.3",
+    "fs-extra": "^5.0.0",
     "mysql2": "^1.5.1",
     "randomstring": "^1.1.5",
-    "sequelize": "^4.32.2"
+    "sequelize": "^4.32.2",
+    "swagger-express-mw": "^0.1.0",
+    "swagger-ui-express": "latest",
+    "yamljs": "^0.3.0",
+    "email-validator":"latest"
   }
 }

@@ -1,0 +1,486 @@
+swagger: '2.0'
+info:
+  version: '0.0.0'
+  title: Care Platform
+  description: This is the API definition for the Care Platform.
+  license:
+    name: MIT
+    url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
+host: localhost:10010
+basePath: /v0
+schemes:
+- http
+#s
+consumes:
+- application/json
+produces:
+- application/json
+securityDefinitions: {}
+
+#IMPORTANT Barer authentication should be employed on most calls, but is not supported by OpenAPI 2.0, awaiting upgrade
+
+paths:
+  /users:
+    x-swagger-router-controller: users
+
+    post:
+      description: Create a new user with only basic details which can be later associated with a client
+      summary: Create a new user
+      tags:
+      - user
+      operationId: createUser
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: New user details
+        schema:
+          $ref: '#/definitions/UserWithPassword'
+      responses:
+        201:
+          description: Successfully created
+        406:
+          description: Data is invalid
+          schema:
+            $ref: '#/definitions/ValidationError'
+
+      
+  /users/me:
+    get:
+      description: Get basic details of your own user including, name, email address and password.
+      summary: Get your own details on the platform
+      tags:
+      - user
+      operationId: UsersMeGet
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/User'
+        401:
+          description: You have not logged in or an invalid or expired token has been supplied
+
+    put:
+      description: Update basic details of your own user including, name, email address and password. Information for fields which should not be updated should not  be supplied.
+      summary: Update your own user account once authenticated
+      tags:
+      - user
+      operationId: UsersMePut
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: New user details
+        schema:
+          $ref: '#/definitions/UserWithPassword'
+      responses:
+        200:
+          description: Successfully updated
+        401:
+          description: You have not logged in or an invalid or expired token has been supplied
+        406:
+          description: The input is not valid
+      
+    delete:
+      description: Delete your own user account. If you are the last user associated with a client, that client will also be deleted. You will need to be authenticated and provide your password in the body of the request to confirm the deletion.
+      summary: Delete your own user account once authenticated
+      tags:
+      - user
+      operationId: UsersMeDelete
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: Credentials Pair
+        schema:
+          $ref: '#/definitions/Credentials'
+      responses:
+        200:
+          description: Successfully deleted
+        401:
+          description: You have not logged in or an invalid or expired token has been supplied
+        406:
+          description: Invalid password supplied
+      
+  /users/login:
+    post:
+      description: Log in with your email address and password and obtain an  authorization token
+      summary: User login
+      tags:
+      - user
+      operationId: UsersLoginPost
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: Credentials Pair
+        schema:
+          $ref: '#/definitions/Credentials'
+      responses:
+        200:
+          description: Successfully authenticated
+          schema:
+            $ref: '#/definitions/JWT'
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: User does not exist
+      
+  /users/passwordResetEmail:
+    post:
+      description: Specify email address to send a password reset email to the email  address of a registered user.
+      summary: Send a password recovery email
+      tags:
+      - user
+      operationId: UsersPasswordResetEmailPost
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: Email address for an exisiting user
+        schema:
+          $ref: '#/definitions/UsersPasswordresetemailRequest'
+      responses:
+        200:
+          description: Email Sent
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: User does not exist
+      
+  /users/passwordReset:
+    post:
+      description: Using your email address, and temporary password reset code, provide a new password for your account.
+      summary: Change your password using a temporary password reset code
+      tags:
+      - user
+      operationId: UsersPasswordResetPost
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: New user details
+        schema:
+          $ref: '#/definitions/PasswordReset'
+      responses:
+        200:
+          description: User account updated
+        401:
+          description: Invalid password reset code
+        404:
+          description: User does not exist
+      
+  /users/me/clients:
+    get:
+      description: Get all clients that are associated with your user account.
+      summary: Get the clients associated with your account
+      tags:
+      - client
+      operationId: UsersMeClientsGet
+      produces:
+      - application/json
+      parameters: []
+      responses:
+        204:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ClientWithID'
+        401:
+          description: You aren't authorised to make this request
+
+    post:
+      description: The new user created from the information provided will be initially  associated with your account.
+      summary: Create a new client associated with your account
+      tags:
+      - client
+      operationId: UsersMeClientsPost
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: New client details
+        schema:
+          $ref: '#/definitions/Client'
+      responses:
+        201:
+          description: Client was successfully created
+          schema:
+            $ref: '#/definitions/ClientWithID'
+        401:
+          description: You aren't authorised to make this change
+        406:
+          description: The data provided is not correct
+      
+  /users/me/clients/{clientID}:
+    delete:
+      description: Remove the link between your account and the client specified in  the clientID. If you are the last user for the client, the client will also be deleted. You will need to provide your user credentials for this request.
+      summary: Remove client from user account
+      tags:
+      - client
+      operationId: UsersMeClientsByClientIDDelete
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: ID of client to remove from account
+      - name: body
+        in: body
+        required: true
+        description: Credentials Pair
+        schema:
+          $ref: '#/definitions/Credentials'
+      responses:
+        200:
+          description: Deleted
+        401:
+          description: You aren't authorised to make this request
+        404:
+          description: There is no client with this ID or you do not have permission to access it.
+      
+  /clients/{clientID}:
+    get:
+      description: Get client information by ID passed in path
+      summary: Get client information by ID
+      tags:
+      - client
+      operationId: ClientsByClientIDGet
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: ID of client to get
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/ClientWithID'
+        401:
+          description: You aren't authorised to make this request
+        404:
+          description: There is no client with this ID or you do not have permission to access it.
+      
+    put:
+      description: Update basic details of the client, such as their name.  Information for fields which should not be updated should not be  supplied.
+      summary: Update the information associated with a client.
+      tags:
+      - client
+      operationId: ClientsByClientIDPut
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: ID of client to get
+      - name: body
+        in: body
+        required: true
+        description: New client details
+        schema:
+          $ref: '#/definitions/Client'
+      responses:
+        201:
+          description: Client was successfully updated
+          schema:
+            $ref: '#/definitions/ClientWithID'
+        401:
+          description: You aren't authorised to make this change
+        406:
+          description: The data provided is not correct
+          
+    delete:
+      description: Delete client with ID passed in path. You will need to provide your user credentials with this request.
+      summary: Delete client by ID
+      tags:
+      - client
+      operationId: ClientsByClientIDDelete
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: ID of client to delete
+      - name: body
+        in: body
+        required: true
+        description: Credentials Pair
+        schema:
+          $ref: '#/definitions/Credentials'
+      responses:
+        200:
+          description: Deleted
+        401:
+          description: You aren't authorised to make this request
+        404:
+          description: There is no client with this ID or you do not have permission to access it.
+
+  /clients/{clientID}/share:
+    post:
+      description: Specify an existing user's email address to send an invitation to for  them to manage the client.
+      summary: Invite user to access the client's data
+      tags:
+      - client
+      operationId: ClientsShareByClientIDPost
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: ID of client to get
+      - name: body
+        in: body
+        required: true
+        description: JSON Web Token
+        schema:
+          $ref: '#/definitions/Invitation'
+      responses:
+        200:
+          description: User was invited to manage this client.
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client or user does not exist.
+
+definitions:
+  UserWithPassword:
+    title: UserWithPassword
+    type: object
+    properties:
+      name:
+        $ref: '#/definitions/Name'
+      email:
+        example: carer@example.com
+        type: string
+      password:
+        example: password
+        type: string
+  Name:
+    title: Name
+    type: object
+    properties:
+      title:
+        example: Dr
+        type: string
+      firstNames:
+        example: Grace
+        type: string
+      surnames:
+        example: Hopper
+        type: string
+  User:
+    title: User
+    type: object
+    properties:
+      name:
+        $ref: '#/definitions/Name'
+      email:
+        example: carer@example.com
+        type: string
+  Credentials:
+    title: Credentials
+    type: object
+    properties:
+      email:
+        example: carer@example.com
+        type: string
+      password:
+        example: password
+        type: string
+    required:
+    - email
+    - password
+  JWT:
+    title: JWT
+    type: object
+    properties:
+      token:
+        description: JSON Web Token
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ.eyJlbWFpbCI6Im9sYXR1bmRlZ2FydWJhQGdtYWlsLmNvbSIsImZ1bGxOYW1lIjoiT2xhdHVuZGUgR2FydWJhIiwiX2lkIjoiNThmMjYzNDdiMTY1YzUxODM1NDMxYTNkIiwiaW F0IjoxNDkyMjgwMTk4fQ.VcMpybz08cB5PsrMSr25En4_EwCGWZVFgciO4M3ENE
+        type: string
+  UsersPasswordresetemailRequest:
+    title: Users PasswordResetEmail Request
+    type: object
+    properties:
+      email:
+        example: carer@example.com
+        type: string
+  PasswordReset:
+    title: PasswordReset
+    type: object
+    properties:
+      email:
+        example: carer@example.com
+        type: string
+      code:
+        example: SA92JS9a029384JASKJN
+        type: string
+      newPassword:
+        example: password
+        type: string
+    required:
+    - email
+    - code
+    - newPassword
+  ClientWithID:
+    title: ClientWithID
+    type: object
+    properties:
+      id:
+        type: integer
+      name:
+        $ref: '#/definitions/Name'
+  Client:
+    title: Client
+    type: object
+    properties:
+      name:
+        $ref: '#/definitions/Name'
+    required:
+    - name
+  Invitation:
+    title: Invitation
+    type: object
+    properties:
+      email:
+        example: carer@example.com
+        type: string
+      admin:
+        example: false
+        type: boolean
+    required:
+    - email
+    - admin
+  ValidationError:
+   title: Validation Error
+   type: string
+   example: "User already exists"

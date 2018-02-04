@@ -1,58 +1,31 @@
-var models = require('./models');
-var bcrypt = require('bcrypt');
+'use strict';
 
-var pwd = "password";
-var date = new Date();
-var email = "email" + date.getMilliseconds();
-var saltRounds = 10;
+var SwaggerExpress = require('swagger-express-mw');
+var app = require('express')();
+module.exports = app; // for testing
 
+var config = {
+  appRoot: __dirname // required config
+};
 
-var namePromise = models.Name.create({
-    title: "Mr",
-    firstNames: "Test",
-    surnames: "User"
+var port = process.env.PORT || 10010;
+
+//DOCS
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
+const swaggerDocument = YAML.load('./api/swagger/swagger.yaml');
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+console.log('View Docs at:\t\t http://localhost:' + port + '/api-docs');
+//END DOCS
+
+SwaggerExpress.create(config, function(err, swaggerExpress) {
+  if (err) { throw err; }
+
+  // install middleware
+  swaggerExpress.register(app);
+
+  app.listen(port);
+  console.log('API endpoint:\t\t http://localhost:' + port + '/v0');
+
 });
-
-var hashPromise = bcrypt.hash(pwd, saltRounds);
-var keyPromise = bcrypt.hash(email + date.getMilliseconds(), saltRounds);
-
-Promise.all([namePromise, hashPromise, keyPromise]).then(([name, hash, key]) => {
-    var userPromise = models.User.create({
-        email: email,
-        passwordHash: hash,
-        nameId: name.id
-    });
-    var clientPromise = models.Client.create({
-        nameId: name.id,
-        key: key
-    });
-
-    Promise.all([userPromise, clientPromise]).then(function ([user, client]) {
-        passwordResetTest(user);
-        user.addClient(client, { through: {admin: true, tentative: false}}).then(() => {
-            user.getClients().then(clients => clients[0].getName().then(name => console.log(name.firstNames)));
-        });
-    });
-});
-
-function passwordResetTest (user){
-    var now = new Date();
-    var expiry = now.setDate(now.getHours() + 2);
-
-    models.PasswordResetCode.destroy({
-        where: {
-            userId: user.id
-        }
-    });
-
-    var randomstring = require("randomstring");
-    var code = randomstring.generate();
-
-    bcrypt.hash(code, saltRounds).then((hash) => {
-        models.PasswordResetCode.create({
-            expiryTime: expiry,
-            resetCodeHash: hash,
-            userId: user.id
-        });
-    });
-}
