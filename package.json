@@ -37,6 +37,7 @@
     "swagger-express-mw": "^0.1.0",
     "swagger-ui-express": "latest",
     "yamljs": "^0.3.0",
-    "email-validator":"latest"
+    "email-validator":"latest",
+    "jsonwebtoken":"latest"
   }
 }

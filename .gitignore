@@ -34,6 +34,7 @@ node_modules
 config/runtime.yaml
 
 config/config.json
+config/appsecrets.js
 *log
 node_modules
 .idea/
