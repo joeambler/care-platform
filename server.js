@@ -26,7 +26,6 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
         throw err;
     }
 
-
     // install middleware
     swaggerExpress.register(app);
 

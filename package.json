@@ -4,7 +4,7 @@
   "description": "Care platform to enable assisted living.",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js",
+    "start": "node server.js",
     "test": "swagger project test"
   },
   "repository": {
