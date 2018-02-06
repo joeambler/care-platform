@@ -2,10 +2,14 @@
 const secrets = require('./config/appsecrets');
 const SwaggerExpress = require('swagger-express-mw');
 const app = require('express')();
+const userContoller = require('./api/controllers/users')
 module.exports = app; // for testing
 
 const config = {
-  appRoot: __dirname // required config
+  appRoot: __dirname, // required config
+  securityHandlers: {
+        userAuth: userContoller.verifyJWT
+    }
 };
 
 //DOCS
@@ -21,6 +25,7 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
     if (err) {
         throw err;
     }
+
 
     // install middleware
     swaggerExpress.register(app);

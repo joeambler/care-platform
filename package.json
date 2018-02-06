@@ -34,7 +34,7 @@
     "mysql2": "^1.5.1",
     "randomstring": "^1.1.5",
     "sequelize": "^4.32.2",
-    "swagger-express-mw": "^0.1.0",
+    "swagger-express-mw": "latest",
     "swagger-ui-express": "latest",
     "yamljs": "^0.3.0",
     "email-validator":"latest",

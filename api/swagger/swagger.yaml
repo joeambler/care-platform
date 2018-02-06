@@ -15,7 +15,12 @@ consumes:
 - application/json
 produces:
 - application/json
-securityDefinitions: {}
+securityDefinitions:
+   # X-API-Key: abcdef12345
+   userAuth:
+     type: apiKey
+     in: header
+     name: X-API-Key
 
 #IMPORTANT Barer authentication should be employed on most calls, but is not supported by OpenAPI 2.0, awaiting upgrade
 
@@ -51,6 +56,8 @@ paths:
     x-swagger-router-controller: users
   
     get:
+      security:
+      - userAuth: []
       description: Get basic details of your own user including, name, email address and password.
       summary: Get your own details on the platform
       tags:
@@ -68,6 +75,8 @@ paths:
           description: You have not logged in or an invalid or expired token has been supplied
 
     put:
+      security:
+      - userAuth: []
       description: Update basic details of your own user including, name, email address and password. Information for fields which should not be updated should not  be supplied.
       summary: Update your own user account once authenticated
       tags:
@@ -91,6 +100,8 @@ paths:
           description: The input is not valid
       
     delete:
+      security:
+      - userAuth: []
       description: Delete your own user account. If you are the last user associated with a client, that client will also be deleted. You will need to be authenticated and provide your password in the body of the request to confirm the deletion.
       summary: Delete your own user account once authenticated
       tags:
@@ -110,6 +121,8 @@ paths:
           description: Successfully deleted
         401:
           description: You have not logged in or an invalid or expired token has been supplied
+        404:
+          description: User account no longer exists
         406:
           description: Invalid password supplied
       

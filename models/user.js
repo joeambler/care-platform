@@ -17,7 +17,8 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: {
                 name: 'nameId',
                 notNull: true
-            }
+            },
+            as: 'name'
         });
         User.belongsToMany(models.Client, {
             through: models.UserClient,
