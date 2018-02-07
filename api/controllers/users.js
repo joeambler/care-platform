@@ -18,7 +18,6 @@ module.exports = {
 
 
 function createUser(req, res) {
-    console.log("Hello");
     var body = req.swagger.params.body.value;
 
     if (!emailValidator.validate(body.email)) {
