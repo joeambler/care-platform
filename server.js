@@ -22,7 +22,6 @@ if (process.env.NODE_ENV === 'production'){
     swaggerDocument.host = process.env.HOST;
 }
 
-console.log(swaggerDocument);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 //END DOCS
@@ -43,6 +42,17 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
     } else{
         const secrets = require('./config/appsecrets');
         app.set('JWTSecret', secrets.JWTSecret);
+    }
+
+    if (process.env.EMAIL){
+        app.set('EmailAccount', {
+            'server': process.env.EMAILSERVER,
+            'email': process.env.EMAIL,
+            'password': process.env.EMAILPASSWORD
+        });
+    } else{
+        const secrets = require('./config/appsecrets');
+        app.set('EmailAccount', secrets.EmailAccount);
     }
 
 });

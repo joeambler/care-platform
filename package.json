@@ -2,7 +2,7 @@
   "name": "care-platform",
   "version": "0.0.0",
   "description": "Care platform to enable assisted living.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "swagger project test"
@@ -29,15 +29,16 @@
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
+    "email-validator": "latest",
     "express": "^4.12.3",
     "fs-extra": "^5.0.0",
+    "jsonwebtoken": "latest",
     "mysql2": "^1.5.1",
+    "nodemailer": "^4.4.2",
     "randomstring": "^1.1.5",
     "sequelize": "^4.32.2",
     "swagger-express-mw": "latest",
     "swagger-ui-express": "latest",
-    "yamljs": "^0.3.0",
-    "email-validator":"latest",
-    "jsonwebtoken":"latest"
+    "yamljs": "^0.3.0"
   }
 }

@@ -175,8 +175,6 @@ paths:
       responses:
         200:
           description: Email Sent
-        401:
-          description: Invalid credentials supplied
         404:
           description: User does not exist
       
@@ -204,6 +202,8 @@ paths:
           description: Invalid password reset code
         404:
           description: User does not exist
+        406:
+          description: New password is invalid
       
   /users/me/clients:
     get:
