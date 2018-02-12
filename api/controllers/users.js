@@ -14,7 +14,8 @@ module.exports = {
     loginUser: loginUser,
     sendPasswordResetEmail: sendPasswordResetEmail,
     usePasswordResetCode: usePasswordResetCode,
-    verifyJWT: verifyJWT
+    verifyJWT: verifyJWT,
+    validCredentials: validCredentials
 };
 
 const saltRounds = 10;

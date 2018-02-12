@@ -204,19 +204,45 @@ paths:
           description: User does not exist
         406:
           description: New password is invalid
-      
+
+  /users/me/clients/tentative:
+      x-swagger-router-controller: clients
+      get:
+        security:
+        - userAuth: []
+        description: Get all clients that are you have been invited to add to your account.
+        summary: Get the tentative clients associated with your account
+        tags:
+        - client
+        operationId: getUsersClientsTentative
+        produces:
+        - application/
+        parameters: []
+        responses:
+          200:
+            description: OK
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/ClientWithID'
+          401:
+            description: You aren't authorised to make this request
+
   /users/me/clients:
+    x-swagger-router-controller: clients
     get:
+      security: 
+      - userAuth: [] 
       description: Get all clients that are associated with your user account.
       summary: Get the clients associated with your account
       tags:
       - client
-      operationId: UsersMeClientsGet
+      operationId: getUsersClients
       produces:
-      - application/json
+      - application/
       parameters: []
       responses:
-        204:
+        200:
           description: OK
           schema:
             type: array
@@ -226,11 +252,13 @@ paths:
           description: You aren't authorised to make this request
 
     post:
+      security: 
+      - userAuth: [] 
       description: The new user created from the information provided will be initially  associated with your account.
       summary: Create a new client associated with your account
       tags:
       - client
-      operationId: UsersMeClientsPost
+      operationId: postUsersClients
       produces:
       - application/json
       parameters:
@@ -251,12 +279,15 @@ paths:
           description: The data provided is not correct
       
   /users/me/clients/{clientID}:
+    x-swagger-router-controller: clients
     delete:
+      security: 
+      - userAuth: [] 
       description: Remove the link between your account and the client specified in  the clientID. If you are the last user for the client, the client will also be deleted. You will need to provide your user credentials for this request.
       summary: Remove client from user account
       tags:
       - client
-      operationId: UsersMeClientsByClientIDDelete
+      operationId: deleteUserClient
       produces:
       - application/json
       parameters:
@@ -280,12 +311,15 @@ paths:
           description: There is no client with this ID or you do not have permission to access it.
       
   /clients/{clientID}:
+    x-swagger-router-controller: clients
     get:
+      security:
+      - userAuth: []
       description: Get client information by ID passed in path
       summary: Get client information by ID
       tags:
       - client
-      operationId: ClientsByClientIDGet
+      operationId: getClient
       produces:
       - application/json
       parameters:
@@ -305,11 +339,13 @@ paths:
           description: There is no client with this ID or you do not have permission to access it.
       
     put:
+      security:
+      - userAuth: []
       description: Update basic details of the client, such as their name.  Information for fields which should not be updated should not be  supplied.
       summary: Update the information associated with a client.
       tags:
       - client
-      operationId: ClientsByClientIDPut
+      operationId: updateClient
       produces:
       - application/json
       parameters:
@@ -335,11 +371,13 @@ paths:
           description: The data provided is not correct
           
     delete:
+      security:
+      - userAuth: []
       description: Delete client with ID passed in path. You will need to provide your user credentials with this request.
       summary: Delete client by ID
       tags:
       - client
-      operationId: ClientsByClientIDDelete
+      operationId: deleteClient
       produces:
       - application/json
       parameters:
@@ -363,12 +401,15 @@ paths:
           description: There is no client with this ID or you do not have permission to access it.
 
   /clients/{clientID}/share:
+    x-swagger-router-controller: clients
     post:
+      security:
+      - userAuth: []
       description: Specify an existing user's email address to send an invitation to for  them to manage the client.
       summary: Invite user to access the client's data
       tags:
       - client
-      operationId: ClientsShareByClientIDPost
+      operationId: shareClient
       produces:
       - application/json
       parameters:
@@ -376,11 +417,11 @@ paths:
         in: path
         required: true
         type: integer
-        description: ID of client to get
+        description: ID of client to share
       - name: body
         in: body
         required: true
-        description: JSON Web Token
+        description: User to share the client with
         schema:
           $ref: '#/definitions/Invitation'
       responses:
@@ -390,6 +431,38 @@ paths:
           description: Invalid credentials supplied
         404:
           description: The client or user does not exist.
+
+  /clients/{clientID}/accept:
+    x-swagger-router-controller: clients
+    post:
+      security:
+      - userAuth: []
+      description: Accept a client that has been shared with you
+      summary:  Accept a client that has been shared with you
+      tags:
+      - client
+      operationId: acceptClient
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: ID of client to accept
+      - name: body
+        in: body
+        required: true
+        description: User to share the client with
+        schema:
+          $ref: '#/definitions/Empty'
+      responses:
+        200:
+          description: The client was accepted
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client does not exist or is not tentative
 
 definitions:
   UserWithPassword:
@@ -500,6 +573,10 @@ definitions:
     required:
     - email
     - admin
+  Empty:
+      title: empty
+      type: object
+
   ValidationError:
    title: Validation Error
    type: string
