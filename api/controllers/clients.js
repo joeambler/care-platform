@@ -17,48 +17,34 @@ module.exports = {
 };
 
 function getUsersClients(req, res) {
-    return fetchUsers(req, res, false);
+    return fetchUsersClients(req, res, false);
 }
 
 function getUsersClientsTentative(req, res) {
-    return fetchUsers(req, res, true);
+    return fetchUsersClients(req, res, true);
 }
 
-function fetchUsers(req, res, tentative){
+function fetchUsersClients(req, res, tentative){
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
         res.end();
     };
 
-    req.User.getClients().then(clients => {
-        let promises = [];
-        let reqClients = [];
-        let n = 0;
-        for (let i = 0; i < clients.length; i++) {
-            if (clients[i].UserClient.tentative == tentative){
-                reqClients[n] = clients[i];
-                promises[n] = clients[i].getName();
-                n++;
-            }
-        }
-
+    req.User.getClients({through: { where: { tentative: tentative}}, include: [{model: models.Name, as: "name"}]}).then(clients => {
         let jsonclients = [];
-        Promise.all(promises).then(names => {
-            let n = 0;
-            for (let i = 0; i < reqClients.length; i++) {
+            for (let i = 0; i < clients.length; i++) {
                 jsonclients[i] = {
-                    id: reqClients[i].id,
+                    id: clients[i].id,
                     name: {
-                        title: names[i].title,
-                        firstNames: names[i].firstNames,
-                        surnames: names[i].surnames
+                        title: clients[i].name.title,
+                        firstNames: clients[i].name.firstNames,
+                        surnames: clients[i].name.surnames
                     }
                 };
             }
             res.status(200).json(jsonclients);
             res.end();
-        });
     }, serverError);
 }
 

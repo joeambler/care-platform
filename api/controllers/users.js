@@ -63,6 +63,12 @@ function createUser(req, res) {
 }
 
 function getUser(req, res) {
+    const error = (reason) => {
+        console.log("User could not be found, may have been deleted. Therefore expired token." + reason);
+        res.status(401).json();
+        res.end();
+    };
+
     models.User.findOne({
         where: {
             id: req.userid
@@ -74,13 +80,12 @@ function getUser(req, res) {
         },
         attributes: ['email']
     }).then(user => {
+        if (user == null){
+            return error("Null user");
+        }
         res.status(200).json(user);
         res.end();
-    }, (reason) => {
-        console.log("Can't get user:" + reason);
-        res.status(403).json();
-        res.end();
-    });
+    }, error );
 }
 
 function updateUser(req, res) {
@@ -131,6 +136,12 @@ function deleteUser(req, res) {
     const userEmail = body.email;
     const userPassword = body.password;
 
+    const serverError = (reason) => {
+        console.log("Cannot delete: " + reason);
+        res.status(500).json();
+        res.end();
+    };
+
     if (req.User.email !== userEmail) {
         console.log("You can only delete your own user account");
         res.status(406).json();
@@ -139,13 +150,26 @@ function deleteUser(req, res) {
     }
 
     const valid = (user) => {
-        user.destroy().then(() => {
-            res.status(200).json();
-            res.end();
-        }, (reason) => {
-            console.log("Cannot delete: " + reason);
-            res.status(500).json();
-            res.end();
+        let destroyPromises = [];
+        user.getClients({include: [{model: models.User, as: "Users"}]}).then(clients => {
+            user.setClients([]).then(() => {
+                //delete singleton clients
+                for (let i = 0; i < clients.length; i++) {
+                    if (clients[i].Users.length === 1) {
+                        destroyPromises.push(clients[i].destroy());
+                    }
+                }
+                //Delete left over password reset codes
+                destroyPromises.push(models.PasswordResetCode.destroy({where: { userId: user.id}}));
+
+                //Delete user
+                Promise.all(destroyPromises).then(() => {
+                    user.destroy().then(() => {
+                        res.status(200).json();
+                        res.end();
+                    }, serverError);
+                }, serverError);
+            }, serverError);
         });
     };
 
@@ -161,8 +185,6 @@ function deleteUser(req, res) {
     };
 
     validCredentials(userEmail, userPassword, valid, invalid, error);
-
-    //TODO: delete clients who only belong to this user.
 }
 
 function loginUser(req, res) {
@@ -342,7 +364,7 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
     };
 
     if (!scopesOrApiKey) {
-        return unauthorizedCallback("No value supplied");;
+        return unauthorizedCallback("No value supplied");
     }
 
     const regex = /Bearer (\S+)/;
