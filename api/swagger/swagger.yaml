@@ -16,8 +16,13 @@ consumes:
 produces:
 - application/json
 securityDefinitions:
-   # X-API-Key: abcdef12345
+   # X-API-Key: Bearer abcdef12345
    userAuth:
+     type: apiKey
+     in: header
+     name: X-API-Key
+  # X-API-Key: abcdef12345
+   moduleAuth:
      type: apiKey
      in: header
      name: X-API-Key
@@ -27,7 +32,6 @@ securityDefinitions:
 paths:
   /users:
     x-swagger-router-controller: users
-
     post:
       description: Create a new user with only basic details which can be later associated with a client
       summary: Create a new user
@@ -453,7 +457,7 @@ paths:
       - name: body
         in: body
         required: true
-        description: User to share the client with
+        description: No body required
         schema:
           $ref: '#/definitions/Empty'
       responses:
@@ -464,7 +468,49 @@ paths:
         404:
           description: The client does not exist or is not tentative
 
+  /clients/{clientID}/modules:
+    x-swagger-router-controller: modules
+    post:
+      security:
+      - userAuth: []
+      description: Create a new module for this client, generating a key to be given to the module. 
+      summary:  Register a new module
+      tags:
+      - client
+      operationId: newModule
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: ID of client to which the module should be added
+      - name: body
+        in: body
+        required: true
+        description: New module information
+        schema:
+          $ref: '#/definitions/NewModule'
+      responses:
+        200:
+          description: The client was accepted
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client does not exist or is not tentative
+  # /clients/modules/{module-id}
+  #   get:
+  #   delete:
+  # /clients/modules/{module-id}/permissions
+  #   post:
+  #   get:
+  #   delete:
+  # /clients/modules/{module-id}/permissions/requested
+  #/modules/requestPermissions
+
 definitions:
+#defintions for clients and users
   UserWithPassword:
     title: UserWithPassword
     type: object
@@ -573,6 +619,29 @@ definitions:
     required:
     - email
     - admin
+    #module defintions
+
+  NewModule:
+    title: Module to create
+    type: object
+    properties:
+      moduleType:
+        type: string
+        enum: 
+        - event
+        - model
+        example: event
+      name: 
+        type: string
+        example: Pill Box
+      apiEndPoint:
+        type: string
+        example: pillboxexample.com/api
+    required:
+    - name
+    - type
+        
+    #other definitions
   Empty:
       title: empty
       type: object

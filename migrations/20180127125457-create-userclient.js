@@ -5,7 +5,7 @@ module.exports = {
       return queryInterface.createTable('UserClients', {
           userId: {
               type: Sequelize.INTEGER,
-              notNull: true,
+              allowNull: false,
               references: {
                   model: 'Users',
                   key: 'id'
@@ -21,7 +21,7 @@ module.exports = {
           },
           clientId: {
               type: Sequelize.INTEGER,
-              notNull: true,
+              allowNull: false,
               references: {
                   model: 'Clients',
                   key: 'id'
