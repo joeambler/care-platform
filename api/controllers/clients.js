@@ -1,8 +1,8 @@
 'use strict';
 
 const models = require('../../models');
-const bcrypt = require('bcrypt');
-const userController = require('./users')
+const userController = require('./users');
+const randomstring = require("randomstring");
 
 module.exports = {
     getUsersClients: getUsersClients,
@@ -49,7 +49,6 @@ function fetchUsersClients(req, res, tentative){
 }
 
 function postUsersClients(req, res) {
-    const randomstring = require("randomstring");
     let clientKey = randomstring.generate(128);
     let user = req.User;
     const body = req.swagger.params.body.value;

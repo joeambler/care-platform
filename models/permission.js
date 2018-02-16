@@ -1,5 +1,5 @@
 'use strict';
-const models = require('models');
+
 module.exports = (sequelize, DataTypes) => {
     var Permission = sequelize.define('Permission', {
         type: DataTypes.ENUM('event', 'device', 'alert'),

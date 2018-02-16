@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     ClientModule.associate = function (models) {
-        ClientModule.hasMany(model.Permission);
+        ClientModule.hasMany(models.Permission);
+        ClientModule.belongsTo(models.Client);
     };
     return ClientModule;
 };

@@ -398,6 +398,9 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
                         as: 'name'
                     }
                 }).then(user => {
+                    if (user == null){
+                        return unauthorizedCallback("User no longer exists");
+                    }
                     req.User = user;
                     callback();
                 }, unauthorizedCallback);

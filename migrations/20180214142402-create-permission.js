@@ -14,7 +14,7 @@ module.exports = {
             tentative: {
                 type: Sequelize.BOOLEAN,
                 defaultValue: false
-            }
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE
@@ -43,7 +43,7 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: true,
                 references: {
-                    model: 'AlertTypes',
+                    model: 'DeviceTypes',
                     key: 'id'
                 }
             },

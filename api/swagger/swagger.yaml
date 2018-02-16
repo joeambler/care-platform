@@ -499,6 +499,9 @@ paths:
             $ref: '#/definitions/Module'
         401:
           description: Invalid credentials supplied
+        404:
+          description: The client does not exist or you are not their admin
+
   # /clients/modules/{module-id}
   #   get:
   #   delete:
@@ -508,43 +511,43 @@ paths:
   #   delete:
   # /clients/modules/{module-id}/permissions/requested
   
-  /modules/requestPermissions:
-    x-swagger-router-controller: permissions
-    post:
-      security:
-      - moduleAuth: []
-      description: Request permissions. You should specify device defintions for any device permissions required. 
-      summary:  Request permissions and define new devices
-      tags:
-      - module
-      operationId: requestPermissions
-      produces:
-      - application/json
-      parameters:
-      - name: body
-        in: body
-        required: true
-        description: List of permissions and defitions for any devices you wish to use
-        schema:
-          type: object
-          properties:
-            permissions:
-              type: array
-              items:
-                $ref: '#/definitions/Permission'
-            deviceDefinitions:
-              type: array
-              items:
-                $ref: '#/definitions/DeviceDefinition'
-      responses:
-        200:
-          description: Permissions were sent
-          schema:
-            $ref: '#/definitions/Module'
-        400:
-          description: Device already exists with a different prototype
-        401:
-          description: The module key you supplied is invalid
+#  /modules/requestPermissions:
+#    x-swagger-router-controller: permissions
+#    post:
+#      security:
+#      - moduleAuth: []
+#      description: Request permissions. You should specify device defintions for any device permissions required.
+#      summary:  Request permissions and define new devices
+#      tags:
+#      - module
+#      operationId: requestPermissions
+#      produces:
+#      - application/json
+#      parameters:
+#      - name: body
+#        in: body
+#        required: true
+#        description: List of permissions and defitions for any devices you wish to use
+#        schema:
+#          type: object
+#          properties:
+#            permissions:
+#              type: array
+#              items:
+#                $ref: '#/definitions/Permission'
+#            deviceDefinitions:
+#              type: array
+#              items:
+#                $ref: '#/definitions/DeviceDefinition'
+#      responses:
+#        200:
+#          description: Permissions were sent
+#          schema:
+#            $ref: '#/definitions/Module'
+#        400:
+#          description: Device already exists with a different prototype
+#        401:
+#          description: The module key you supplied is invalid
 
 definitions:
 #defintions for clients and users
@@ -690,6 +693,9 @@ definitions:
       key:
         type: string
         example: pJN2GqumRbOmtNuCgKlhxjDgRWepazFGuCiikGcizc3GtUM9d8MXz5LCfEI0DjS0HzeiWODd9VGCjcTenttVnsCxG4RH1Sj1QMHe
+      clientId:
+        type: integer
+        example: 0
     required:
     - id
     - key

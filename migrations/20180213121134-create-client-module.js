@@ -32,8 +32,15 @@ module.exports = {
             apiEndPoint: {
                 type: Sequelize.STRING,
                 allowNull: true
+            },
+            clientId: {
+                type: Sequelize.INTEGER,
+                references: {
+                    model: 'Clients',
+                    key: 'id'
+                }
             }
-        });
+         });
     },
     down: (queryInterface, Sequelize) => {
         return queryInterface.dropTable('ClientModules');
