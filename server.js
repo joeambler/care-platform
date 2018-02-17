@@ -23,7 +23,10 @@ if (process.env.NODE_ENV === 'production'){
 }
 
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.get('/', function (req, res) {
+    res.redirect('/api-docs');
+});
 //END DOCS
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {
