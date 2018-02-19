@@ -499,24 +499,118 @@ paths:
             $ref: '#/definitions/Module'
         401:
           description: Invalid credentials supplied
+        # TODO: NOT IMPLIMENTED
         404:
-          description: The client does not exist or you are not their admin
+          description: The client does not exist
+          
+    get:
+      security:
+      - userAuth: []
+      description: See the modules associated with this client 
+      summary:  Get client's modules
+      tags:
+      - client
+      operationId: getModules
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: Get the modules of this client
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Module'
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client does not exist
+        
+  /clients/{clientID}/modules/{moduleID}:
+    x-swagger-router-controller: modules
+    get:
+      security:
+      - userAuth: []
+      description: See a specific module of a client
+      summary:  Get a single module of the client
+      tags:
+      - client
+      operationId: getModuleById
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: Get the modules of this client
+      - name: moduleID
+        in: path
+        required: true
+        type: integer
+        description: The module to get
+      responses:
+        200:
+          description: OK
+          schema:
+           $ref: '#/definitions/Module'
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client does not exist 
+          
+    delete:
+      security:
+      - userAuth: []
+      description: Delete a module of a client
+      summary:  Delete a single module of the client
+      tags:
+      - client
+      operationId: deleteModuleById
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: Get the modules of this client
+      - name: moduleID
+        in: path
+        required: true
+        type: integer
+        description: The module to delete
+      responses:
+        200:
+          description: OK
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client does not exist
+          
+  
 
-  # /clients/modules/{module-id}
+  # /clients/{clientID}/modules/{module-id}/permissions
   #   get:
   #   delete:
-  # /clients/modules/{module-id}/permissions
+  
+  # /clients/{clientID}/modules/{module-id}/permissions/requested:
+  #   get:
+  
+  # /clients/{clientID}/modules/{module-id}/permissions/accept:
   #   post:
-  #   get:
-  #   delete:
-  # /clients/modules/{module-id}/permissions/requested
   
   /modules/requestPermissions:
     x-swagger-router-controller: permissions
     post:
       security:
       - moduleAuth: []
-      description: Request permissions. You should specify device defintions for any device permissions required.
+      description: Request permissions. You should specify device defintions for any device permissions required. 
       summary:  Request permissions and define new devices
       tags:
       - module
@@ -542,13 +636,10 @@ paths:
       responses:
         200:
           description: Permissions were sent
-        400:
-          description: 'Device already exists with a different prototype (conflicting device is returned. Or you
-            permissions and device definitions do not agree.'
           schema:
-             type: array
-             items:
-              $ref: '#/definitions/DeviceDefinition'
+            $ref: '#/definitions/Module'
+        400:
+          description: Device already exists with a different prototype
         401:
           description: The module key you supplied is invalid
 
@@ -696,9 +787,6 @@ definitions:
       key:
         type: string
         example: pJN2GqumRbOmtNuCgKlhxjDgRWepazFGuCiikGcizc3GtUM9d8MXz5LCfEI0DjS0HzeiWODd9VGCjcTenttVnsCxG4RH1Sj1QMHe
-      clientId:
-        type: integer
-        example: 0
     required:
     - id
     - key
@@ -708,32 +796,31 @@ definitions:
     type: object
     title: Module Permission
     properties:
-      type:
+      permissionType:
         type: string
         enum:
         - event
         - device
         - alert
-        example: 'device'
-      name:
+      typeName:
         type: string
-        example: "Pill Box"
+        example: "Door Opened"
     required:
-    - type
-    - name
+    - permissionType
+    - typeName
     
   DeviceDefinition:
     type: object
     title: Device Definition
     properties:
-      type:
+      typeName:
         type: string
         example: Pill Box
       prototype:
         type: string
         example: "{\"location\": \"string\"}"
     required:
-    - type
+    - typeName
     - prototype
         
         
