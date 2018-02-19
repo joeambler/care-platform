@@ -13,11 +13,11 @@ module.exports = {
                 unique: true,
                 allowNull: false
             },
-            moduleType: {
+            type: {
                 type: Sequelize.ENUM('event', 'model'),
                 allowNull: false
             },
-            moduleName: {
+            name: {
                 type: Sequelize.STRING,
                 allowNull: false
             },

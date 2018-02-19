@@ -499,7 +499,6 @@ paths:
             $ref: '#/definitions/Module'
         401:
           description: Invalid credentials supplied
-        # TODO: NOT IMPLIMENTED
         404:
           description: The client does not exist
           

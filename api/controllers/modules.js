@@ -5,7 +5,8 @@ const randomstring = require("randomstring");
 
 module.exports = {
     newModule: newModule,
-    authenticateModule: authenticateModule
+    authenticateModule: authenticateModule,
+    getModules: getModules,
 };
 
 
@@ -13,7 +14,6 @@ function newModule(req, res) {
     const body = req.swagger.params.body.value;
     const clientId = req.swagger.params.clientID.value;
     const user = req.User;
-    console.log(clientId);
 
     const key = randomstring.generate(100);
 
@@ -31,8 +31,8 @@ function newModule(req, res) {
 
     const moduleData = {
         key: key,
-        moduleType: body.type,
-        moduleName: body.name,
+        type: body.type,
+        name: body.name,
         apiEndPoint: body.apiEndPoint
     };
 
@@ -52,7 +52,38 @@ function newModule(req, res) {
     }, serverErrror);
 }
 
-function authenticateModule (req, authOrSecDef, scopesOrApiKey, callback) {
+function getModules(req, res) {
+    const clientId = req.swagger.params.clientID.value;
+    const user = req.User;
+
+    const serverErrror = (err) => {
+        console.log("Cannot add: " + err);
+        res.status(500).json();
+        res.end();
+    };
+
+    const notFoundError = () => {
+        console.log("Client not found");
+        res.status(404).json();
+        res.end();
+    };
+
+    user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
+        .then(clients => {
+            if (clients.length < 1) return notFoundError;
+            clients[0].getModules({attributes: ['id', 'name', 'apiEndPoint', 'key']}).then((modules) => {
+                const moduleObjects = [];
+                modules.forEach(m => {
+                    moduleObjects.push(m.get({plain:true}));
+                });
+                res.status(200).json(moduleObjects);
+                res.end();
+            }, serverErrror);
+        }, serverErrror);
+
+}
+
+function authenticateModule(req, authOrSecDef, scopesOrApiKey, callback) {
     const unauthorizedCallback = (reason) => {
         console.log(reason);
         req.res.status(401).json();

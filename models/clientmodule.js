@@ -6,11 +6,11 @@ module.exports = (sequelize, DataTypes) => {
             unique: true,
             allowNull: false
         },
-        moduleType: {
+        type: {
             type: DataTypes.ENUM('event', 'model'),
             allowNull: false
         },
-        moduleName: {
+        name: {
             type: DataTypes.STRING,
             allowNull: false
         },
