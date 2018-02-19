@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM('event', 'device', 'alert'),
         tentative: {
             type: DataTypes.BOOLEAN,
-            defaultValue: false
+            defaultValue: true
         }
     });
 

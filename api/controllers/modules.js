@@ -4,9 +4,9 @@ const models = require('../../models');
 const randomstring = require("randomstring");
 
 module.exports = {
-    newModule: newModule
+    newModule: newModule,
+    authenticateModule: authenticateModule
 };
-
 
 
 function newModule(req, res) {
@@ -36,7 +36,7 @@ function newModule(req, res) {
         apiEndPoint: body.apiEndPoint
     };
 
-    user.getClients({where: { id: clientId}, through: { where: { admin: true}}}).then(clients => {
+    user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).then(clients => {
         if (clients.length < 1) return notFoundError;
         const client = clients[0];
 
@@ -50,9 +50,28 @@ function newModule(req, res) {
             }, serverErrror);
         }, serverErrror);
     }, serverErrror);
+}
 
+function authenticateModule (req, authOrSecDef, scopesOrApiKey, callback) {
+    const unauthorizedCallback = (reason) => {
+        console.log(reason);
+        req.res.status(401).json();
+        req.res.end();
+    };
 
+    if (!scopesOrApiKey) {
+        return unauthorizedCallback("No value supplied");
+    }
 
+    models.ClientModule.findOne({where: {key: scopesOrApiKey}}).then(module => {
+        if (module == null) {
+            return unauthorizedCallback("Key does not match");
+        }
+        else {
+            req.Module = module;
+            callback();
+        }
+    }, unauthorizedCallback);
 
 
 }

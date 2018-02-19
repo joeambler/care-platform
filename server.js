@@ -2,13 +2,17 @@
 
 const SwaggerExpress = require('swagger-express-mw');
 const app = require('express')();
-const userContoller = require('./api/controllers/users')
+const userContoller = require('./api/controllers/users');
+const moduleController = require('./api/controllers/modules');
+
 module.exports = app; // for testing
 
 const config = {
   appRoot: __dirname, // required config
   securityHandlers: {
-        userAuth: userContoller.verifyJWT
+        userAuth: userContoller.verifyJWT,
+        moduleAuth: moduleController.authenticateModule
+
     }
 };
 

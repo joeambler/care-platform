@@ -6,7 +6,8 @@ module.exports = {
         password: null,
         database: 'test',
         host: 'localhost',
-        dialect: 'mysql'
+        dialect: 'mysql',
+        operatorsAliases: false
     },
     production: {
         username: process.env.DB_USERNAME,
@@ -14,6 +15,7 @@ module.exports = {
         database: 'platform',
         host: process.env.DB_HOSTNAME,
         dialect: 'mysql',
+        operatorsAliases: false
         // dialectOptions: {
         //     ssl: {
         //         ca: fs.readFileSync(__dirname + '/mysql-ca-master.crt')

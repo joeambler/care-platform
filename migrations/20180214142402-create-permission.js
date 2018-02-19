@@ -13,7 +13,7 @@ module.exports = {
             },
             tentative: {
                 type: Sequelize.BOOLEAN,
-                defaultValue: false
+                defaultValue: true
             },
             createdAt: {
                 allowNull: false,
@@ -25,7 +25,6 @@ module.exports = {
             },
             ClientModuleId: {
                 type: Sequelize.INTEGER,
-                allowNull: false,
                 references: {
                     model: 'ClientModules',
                     key: 'id'

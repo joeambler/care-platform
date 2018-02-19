@@ -511,43 +511,46 @@ paths:
   #   delete:
   # /clients/modules/{module-id}/permissions/requested
   
-#  /modules/requestPermissions:
-#    x-swagger-router-controller: permissions
-#    post:
-#      security:
-#      - moduleAuth: []
-#      description: Request permissions. You should specify device defintions for any device permissions required.
-#      summary:  Request permissions and define new devices
-#      tags:
-#      - module
-#      operationId: requestPermissions
-#      produces:
-#      - application/json
-#      parameters:
-#      - name: body
-#        in: body
-#        required: true
-#        description: List of permissions and defitions for any devices you wish to use
-#        schema:
-#          type: object
-#          properties:
-#            permissions:
-#              type: array
-#              items:
-#                $ref: '#/definitions/Permission'
-#            deviceDefinitions:
-#              type: array
-#              items:
-#                $ref: '#/definitions/DeviceDefinition'
-#      responses:
-#        200:
-#          description: Permissions were sent
-#          schema:
-#            $ref: '#/definitions/Module'
-#        400:
-#          description: Device already exists with a different prototype
-#        401:
-#          description: The module key you supplied is invalid
+  /modules/requestPermissions:
+    x-swagger-router-controller: permissions
+    post:
+      security:
+      - moduleAuth: []
+      description: Request permissions. You should specify device defintions for any device permissions required.
+      summary:  Request permissions and define new devices
+      tags:
+      - module
+      operationId: requestPermissions
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: List of permissions and defitions for any devices you wish to use
+        schema:
+          type: object
+          properties:
+            permissions:
+              type: array
+              items:
+                $ref: '#/definitions/Permission'
+            deviceDefinitions:
+              type: array
+              items:
+                $ref: '#/definitions/DeviceDefinition'
+      responses:
+        200:
+          description: Permissions were sent
+        400:
+          description: 'Device already exists with a different prototype (conflicting device is returned. Or you
+            permissions and device definitions do not agree.'
+          schema:
+             type: array
+             items:
+              $ref: '#/definitions/DeviceDefinition'
+        401:
+          description: The module key you supplied is invalid
 
 definitions:
 #defintions for clients and users
@@ -705,31 +708,32 @@ definitions:
     type: object
     title: Module Permission
     properties:
-      permissionType:
+      type:
         type: string
         enum:
         - event
         - device
         - alert
-      typeName:
+        example: 'device'
+      name:
         type: string
-        example: "Door Opened"
+        example: "Pill Box"
     required:
-    - permissionType
-    - typeName
+    - type
+    - name
     
   DeviceDefinition:
     type: object
     title: Device Definition
     properties:
-      typeName:
+      type:
         type: string
         example: Pill Box
       prototype:
         type: string
         example: "{\"location\": \"string\"}"
     required:
-    - typeName
+    - type
     - prototype
         
         
