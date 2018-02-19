@@ -7,7 +7,8 @@ module.exports = {
     newModule: newModule,
     authenticateModule: authenticateModule,
     getModules: getModules,
-    getModuleById: getModuleById
+    getModuleById: getModuleById,
+    deleteModuleById: deleteModuleById
 };
 
 
@@ -108,6 +109,37 @@ function getModuleById(req, res) {
                         return notFoundError()
                     }
                     res.status(200).json(modules[0].get({plain: true}));
+                    res.end();
+                }, serverErrror);
+        }, serverErrror);
+}
+
+function deleteModuleById(req, res) {
+    const clientId = req.swagger.params.clientID.value;
+    const moduleID = req.swagger.params.moduleID.value;
+    const user = req.User;
+
+    const serverErrror = (err) => {
+        console.log("Cannot add: " + err);
+        res.status(500).json();
+        res.end();
+    };
+
+    const notFoundError = () => {
+        res.status(404).json();
+        res.end();
+    };
+
+    user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
+        .then(clients => {
+            if (clients.length < 1) return notFoundError();
+            clients[0].getModules({where: {id: moduleID}})
+                .then(modules => {
+                    if (modules.length < 1) {
+                        return notFoundError()
+                    }
+                    modules[0].destroy();
+                    res.status(200).json();
                     res.end();
                 }, serverErrror);
         }, serverErrror);
