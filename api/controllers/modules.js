@@ -7,6 +7,7 @@ module.exports = {
     newModule: newModule,
     authenticateModule: authenticateModule,
     getModules: getModules,
+    getModuleById: getModuleById
 };
 
 
@@ -37,7 +38,7 @@ function newModule(req, res) {
     };
 
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).then(clients => {
-        if (clients.length < 1) return notFoundError;
+        if (clients.length < 1) return notFoundError();
         const client = clients[0];
 
         models.ClientModule.create(moduleData).then((module) => {
@@ -70,17 +71,46 @@ function getModules(req, res) {
 
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
         .then(clients => {
-            if (clients.length < 1) return notFoundError;
+            if (clients.length < 1) return notFoundError();
             clients[0].getModules({attributes: ['id', 'name', 'apiEndPoint', 'key']}).then((modules) => {
                 const moduleObjects = [];
                 modules.forEach(m => {
-                    moduleObjects.push(m.get({plain:true}));
+                    moduleObjects.push(m.get({plain: true}));
                 });
                 res.status(200).json(moduleObjects);
                 res.end();
             }, serverErrror);
         }, serverErrror);
+}
 
+function getModuleById(req, res) {
+    const clientId = req.swagger.params.clientID.value;
+    const moduleID = req.swagger.params.moduleID.value;
+    const user = req.User;
+
+    const serverErrror = (err) => {
+        console.log("Cannot add: " + err);
+        res.status(500).json();
+        res.end();
+    };
+
+    const notFoundError = () => {
+        res.status(404).json();
+        res.end();
+    };
+
+    user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
+        .then(clients => {
+            if (clients.length < 1) return notFoundError();
+            clients[0].getModules({attributes: ['id', 'name', 'apiEndPoint', 'key'], where: {id: moduleID}})
+                .then(modules => {
+                    if (modules.length < 1) {
+                        return notFoundError()
+                    }
+                    res.status(200).json(modules[0].get({plain: true}));
+                    res.end();
+                }, serverErrror);
+        }, serverErrror);
 }
 
 function authenticateModule(req, authOrSecDef, scopesOrApiKey, callback) {

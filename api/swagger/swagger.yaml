@@ -561,7 +561,7 @@ paths:
         401:
           description: Invalid credentials supplied
         404:
-          description: The client does not exist 
+          description: The client or module does not exist
           
     delete:
       security:
@@ -590,7 +590,7 @@ paths:
         401:
           description: Invalid credentials supplied
         404:
-          description: The client does not exist
+          description: The client or module does not exist
           
   
 
