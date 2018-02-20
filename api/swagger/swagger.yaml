@@ -594,14 +594,78 @@ paths:
           
   
 
-  # /clients/{clientID}/modules/{module-id}/permissions
-  #   get:
+  /clients/{clientID}/modules/{moduleID}/permissions:
+    x-swagger-router-controller: permissions
+    get:
+      security:
+      - userAuth: []
+      description: If the module has requested any new permissions, you can get them here.
+      summary:  See the permissions the module has requested
+      tags:
+      - client
+      operationId: getPermissions
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: Get the modules of this client
+      - name: moduleID
+        in: path
+        required: true
+        type: integer
+        description: The module to get
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Permission'
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client or module does not exist, or you are not the client's admin.
   #   delete:
   
-  # /clients/{clientID}/modules/{module-id}/permissions/requested:
-  #   get:
+  /clients/{clientID}/modules/{moduleID}/permissions/requested:
+    x-swagger-router-controller: permissions
+    get:
+      security:
+      - userAuth: []
+      description: If the module has requested any new permissions, you can get them here.
+      summary:  See the permissions the module has requested
+      tags:
+      - client
+      operationId: getRequestedPermissions
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: Get the modules of this client
+      - name: moduleID
+        in: path
+        required: true
+        type: integer
+        description: The module to get
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Permission'
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client or module does not exist, or you are not the client's admin.
   
-  # /clients/{clientID}/modules/{module-id}/permissions/accept:
+  # /clients/{clientID}/modules/{moduleID}/permissions/accept:
   #   post:
   
   /modules/requestPermissions:
@@ -795,31 +859,32 @@ definitions:
     type: object
     title: Module Permission
     properties:
-      permissionType:
+      type:
         type: string
         enum:
         - event
         - device
         - alert
-      typeName:
+        example: 'device'
+      name:
         type: string
-        example: "Door Opened"
+        example: "Pill Box"
     required:
-    - permissionType
-    - typeName
+    - type
+    - name
     
   DeviceDefinition:
     type: object
     title: Device Definition
     properties:
-      typeName:
+      type:
         type: string
         example: Pill Box
       prototype:
         type: string
         example: "{\"location\": \"string\"}"
     required:
-    - typeName
+    - type
     - prototype
         
         

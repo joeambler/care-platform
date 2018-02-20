@@ -3,7 +3,9 @@
 const models = require('../../models');
 
 module.exports = {
-    requestPermissions: requestPermissions
+    requestPermissions: requestPermissions,
+    getPermissions: getPermissions,
+    getRequestedPermissions: getRequestedPermissions
 };
 
 function requestPermissions(req, res) {
@@ -31,7 +33,7 @@ function requestPermissions(req, res) {
 
     const checks = [permissionAndDevicesMatch(deviceDefinitions, permissions),
         getDefinitionConflicts(deviceDefinitions),
-        getModulePermissions(module)];
+        getModulePermissionsPlain(module, null)];
 
 
     Promise.all(checks).then(([match, devicesComparison, existingPermissions]) => {
@@ -61,9 +63,14 @@ function requestPermissions(req, res) {
     }, serverError);
 }
 
-function getModulePermissions (module) {
+function getModulePermissionsPlain(module, tentative) {
     return new Promise((fulfill, reject) => {
-        module.getPermissions({include: [models.EventType, models.AlertType, models.DeviceType]}).then((permissions) => {
+        const options = {include: [models.EventType, models.AlertType, models.DeviceType]};
+        if (tentative !== null){
+            options.where = {tentative: tentative};
+        }
+
+        module.getPermissions(options).then((permissions) => {
             const flatPermissions = [];
             permissions.forEach(p => {
                 let name;
@@ -82,8 +89,8 @@ function getModulePermissions (module) {
                 }
 
                 flatPermissions.push({
-                    type : p.type,
-                    name : name
+                    type: p.type,
+                    name: name
                 })
             });
             fulfill(flatPermissions);
@@ -98,6 +105,7 @@ function permissionAndDevicesMatch(deviceDefinitions, permissions) {
         });
         const correctlyDefinedPermissions = devicePermissions.filter(p => {
             return deviceDefinitions.filter(device => {
+                console.log([device.type, p.name]);
                 return device.type === p.name;
             }).length === 1;
         });
@@ -175,8 +183,8 @@ function addPermissionsByType(t, type, permissions, model, module) {
     if (permissionsOfType.length < 1) return;
 
     permissionsOfType.forEach(p => {
-        promises.push( model.findOrCreate({where: {type: p.name}, transaction: t}).spread(instance =>
-            models.Permission.create({type: type},{ transaction: t}).then(p => {
+        promises.push(model.findOrCreate({where: {type: p.name}, transaction: t}).spread(instance =>
+            models.Permission.create({type: type}, {transaction: t}).then(p => {
                 const promises = [];
 
                 promises.push(type === 'event' ? p.setEventType(instance, {transaction: t}) :
@@ -191,6 +199,43 @@ function addPermissionsByType(t, type, permissions, model, module) {
     return Promise.all(promises);
 }
 
+function getPermissions(req, res) {
+    getModulePermissionsREST(req, res, false)
+}
 
+function getRequestedPermissions(req, res) {
+    getModulePermissionsREST(req, res, true)
+}
 
+function getModulePermissionsREST(req, res, tentative) {
+    const clientId = req.swagger.params.clientID.value;
+    const moduleID = req.swagger.params.moduleID.value;
+    const user = req.User;
 
+    const serverErrror = (err) => {
+        console.log("Cannot get: " + err);
+        res.status(500).json();
+        res.end();
+    };
+
+    const notFoundError = () => {
+        res.status(404).json();
+        res.end();
+    };
+
+    user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).then(clients => {
+        if (clients.length < 1) {
+            return notFoundError();
+        }
+        clients[0].getModules({where: {id: moduleID}}).then(modules => {
+            if (modules.length < 1) {
+                return notFoundError();
+            }
+
+            getModulePermissionsPlain(modules[0], tentative).then(permissions => {
+                res.status(200).json(permissions);
+                res.end();
+            }, serverErrror);
+        }, serverErrror);
+    }, serverErrror);
+}
