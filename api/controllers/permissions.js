@@ -5,7 +5,9 @@ const models = require('../../models');
 module.exports = {
     requestPermissions: requestPermissions,
     getPermissions: getPermissions,
-    getRequestedPermissions: getRequestedPermissions
+    getRequestedPermissions: getRequestedPermissions,
+    acceptPermissions: acceptPermissions,
+    revokePermissions: revokePermissions
 };
 
 function requestPermissions(req, res) {
@@ -33,11 +35,10 @@ function requestPermissions(req, res) {
 
     const checks = [permissionAndDevicesMatch(deviceDefinitions, permissions),
         getDefinitionConflicts(deviceDefinitions),
-        getModulePermissionsPlain(module, null)];
+        getModulePermissionsFlat(module, null, false)];
 
 
     Promise.all(checks).then(([match, devicesComparison, existingPermissions]) => {
-        console.log(existingPermissions);
 
         if (!match) {
             console.log("Badly defined device permissions/definitions");
@@ -51,6 +52,7 @@ function requestPermissions(req, res) {
         const newPermissions = permissions.filter(p =>
             existingPermissions.filter(ep =>
                 ep.type === p.type && ep.name === p.name).length === 0
+
         );
 
         if (newPermissions.length < 1) return success();
@@ -63,7 +65,7 @@ function requestPermissions(req, res) {
     }, serverError);
 }
 
-function getModulePermissionsPlain(module, tentative) {
+function getModulePermissionsFlat(module, tentative, includeOriginal) {
     return new Promise((fulfill, reject) => {
         const options = {include: [models.EventType, models.AlertType, models.DeviceType]};
         if (tentative !== null){
@@ -72,6 +74,7 @@ function getModulePermissionsPlain(module, tentative) {
 
         module.getPermissions(options).then((permissions) => {
             const flatPermissions = [];
+            const databasePermissions = [];
             permissions.forEach(p => {
                 let name;
                 switch (p.type) {
@@ -88,11 +91,19 @@ function getModulePermissionsPlain(module, tentative) {
                         return reject();
                 }
 
-                flatPermissions.push({
+                const flatPermission = {
                     type: p.type,
-                    name: name
-                })
+                    name: name,
+
+                };
+
+                if (includeOriginal){
+                    flatPermission.permission =  p
+                }
+
+                flatPermissions.push(flatPermission);
             });
+
             fulfill(flatPermissions);
         }, reject)
     });
@@ -212,7 +223,7 @@ function getModulePermissionsREST(req, res, tentative) {
     const moduleID = req.swagger.params.moduleID.value;
     const user = req.User;
 
-    const serverErrror = (err) => {
+    const serverError = (err) => {
         console.log("Cannot get: " + err);
         res.status(500).json();
         res.end();
@@ -232,10 +243,78 @@ function getModulePermissionsREST(req, res, tentative) {
                 return notFoundError();
             }
 
-            getModulePermissionsPlain(modules[0], tentative).then(permissions => {
+            getModulePermissionsFlat(modules[0], tentative, false).then(permissions => {
                 res.status(200).json(permissions);
                 res.end();
-            }, serverErrror);
-        }, serverErrror);
-    }, serverErrror);
+            }, serverError);
+        }, serverError);
+    }, serverError);
+}
+
+function acceptPermissions(req, res) {
+    changePermissionStatusREST(req,res, false);
+}
+
+function revokePermissions(req, res) {
+    changePermissionStatusREST(req,res, true);
+}
+
+function changePermissionStatusREST(req, res, setTentative) {
+    const clientId = req.swagger.params.clientID.value;
+    const moduleID = req.swagger.params.moduleID.value;
+    const permissionsToChange = req.swagger.params.body.value;
+    const user = req.User;
+
+    const serverError = (err) => {
+        console.log("Cannot get: " + err);
+        res.status(500).json();
+        res.end();
+    };
+
+    const notFoundError = () => {
+        res.status(404).json();
+        res.end();
+    };
+
+    user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).then(clients => {
+        if (clients.length < 1) {
+            return notFoundError();
+        }
+        clients[0].getModules({where: {id: moduleID}}).then(modules => {
+            if (modules.length < 1) {
+                return notFoundError();
+            }
+
+            getModulePermissionsFlat(modules[0], !setTentative, true).then((flatPermissions) => {
+                const nonExistentPermissions = [];
+                const permissionsToUpdate = [];
+                permissionsToChange.forEach(p => {
+                    const matching = flatPermissions.filter(fp => fp.type === p.type && fp.name === p.name);
+
+                    if (matching.length < 1){
+                        nonExistentPermissions.push(p);
+                    } else {
+                        permissionsToUpdate.push(matching[0].permission);
+                    }
+                });
+
+                if (nonExistentPermissions.length > 0){
+                    res.status(400).json(nonExistentPermissions);
+                    res.end();
+                    return;
+                }
+
+                const promises = [];
+                permissionsToUpdate.forEach(p =>{
+                    p.tentative = setTentative;
+                    promises.push(p.save());
+                });
+
+                Promise.all(promises).then(() => {
+                    res.status(200).json();
+                    res.end();
+                }, serverError);
+            }, serverError);
+        }, serverError);
+    }, serverError);
 }

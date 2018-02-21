@@ -665,8 +665,95 @@ paths:
         404:
           description: The client or module does not exist, or you are not the client's admin.
   
-  # /clients/{clientID}/modules/{moduleID}/permissions/accept:
-  #   post:
+  /clients/{clientID}/modules/{moduleID}/permissions/accept:
+    x-swagger-router-controller: permissions
+    post:
+      security:
+      - userAuth: []
+      description: Accept permissions that where requested by the module
+      summary:  Accept permissions that where requested by the module
+      tags:
+      - client
+      operationId: acceptPermissions
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: Get the modules of this client
+      - name: moduleID
+        in: path
+        required: true
+        type: integer
+        description: The module to get
+      - name: body
+        in: body
+        required: true
+        description: List of permissions to accept
+        schema:
+            type: array
+            items:
+              $ref: '#/definitions/Permission'
+      responses:
+        200:
+          description: Permissions were accepted
+        400:
+          description: Permission(s) not requested or already accepted
+          schema:
+              type: array
+              items:
+                $ref: '#/definitions/Permission'
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client or module does not exist, or you are not the client's admin.
+
+  /clients/{clientID}/modules/{moduleID}/permissions/revoke:
+    x-swagger-router-controller: permissions
+    post:
+      security:
+      - userAuth: []
+      description: Revoke previously accepted permissions.
+      summary:  Revoke previously accepted permissions
+      tags:
+      - client
+      operationId: revokePermissions
+      produces:
+      - application/json
+      parameters:
+      - name: clientID
+        in: path
+        required: true
+        type: integer
+        description: Get the modules of this client
+      - name: moduleID
+        in: path
+        required: true
+        type: integer
+        description: The module to get
+      - name: body
+        in: body
+        required: true
+        description: List of permissions to revoke
+        schema:
+            type: array
+            items:
+              $ref: '#/definitions/Permission'
+      responses:
+        200:
+          description: Permissions were revoked
+        400:
+          description: Permission were not accepted anyway
+          schema:
+              type: array
+              items:
+                $ref: '#/definitions/Permission'
+        401:
+          description: Invalid credentials supplied
+        404:
+          description: The client or module does not exist, or you are not the client's admin.
   
   /modules/requestPermissions:
     x-swagger-router-controller: permissions
@@ -699,8 +786,6 @@ paths:
       responses:
         200:
           description: Permissions were sent
-          schema:
-            $ref: '#/definitions/Module'
         400:
           description: Device already exists with a different prototype
         401:
