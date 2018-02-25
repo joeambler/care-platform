@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable('ClientModules', {
+        return queryInterface.createTable('ClientComponents', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -35,6 +35,7 @@ module.exports = {
             },
             clientId: {
                 type: Sequelize.INTEGER,
+                onDelete: "CASCADE",
                 references: {
                     model: 'Clients',
                     key: 'id'
@@ -43,6 +44,6 @@ module.exports = {
          });
     },
     down: (queryInterface, Sequelize) => {
-        return queryInterface.dropTable('ClientModules');
+        return queryInterface.dropTable('ClientComponents');
     }
 };
