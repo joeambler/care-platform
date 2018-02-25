@@ -2,10 +2,15 @@ swagger: '2.0'
 info:
   version: '0.0.0'
   title: Care Platform
-  description: This is the API definition for the Care Platform.
-  license:
-    name: MIT
-    url: http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT
+  description: 'This is the API definition for the Care Platform.
+
+  Authentication  Nodes:
+  Click Authorize to enter User and Component authorization codes.
+
+  - userAuth: The JWT token provided by the login command. Since the swagger 2.0 (OpenAPI) specification does
+       not natively support bearer authentication. Please use this APIKey field. Prefix it with the word Bearer,
+       like this: Bearer JWT_TOKEN
+  - componentAuth: The key of the component, this can be obtained by making GET requests to .../components.'
 host: localhost:10010
 basePath: /v0
 schemes:
@@ -16,18 +21,15 @@ consumes:
 produces:
 - application/json
 securityDefinitions:
-   # X-API-Key: Bearer abcdef12345
    userAuth:
      type: apiKey
      in: header
      name: X-API-Key
-  # X-API-Key: abcdef12345
-   moduleAuth:
+
+   componentAuth:
      type: apiKey
      in: header
      name: X-API-Key
-
-#IMPORTANT Barer authentication should be employed on most calls, but is not supported by OpenAPI 2.0, awaiting upgrade
 
 paths:
   /users:
@@ -468,16 +470,16 @@ paths:
         404:
           description: The client does not exist or is not tentative
 
-  /clients/{clientID}/modules:
-    x-swagger-router-controller: modules
+  /clients/{clientID}/components:
+    x-swagger-router-controller: components
     post:
       security:
       - userAuth: []
-      description: Create a new module for this client, generating a key to be given to the module. 
-      summary:  Register a new module
+      description: Create a new component for this client, generating a key to be given to the component. 
+      summary:  Register a new component
       tags:
       - client
-      operationId: newModule
+      operationId: newComponent
       produces:
       - application/json
       parameters:
@@ -485,18 +487,18 @@ paths:
         in: path
         required: true
         type: integer
-        description: ID of client to which the module should be added
+        description: ID of client to which the component should be added
       - name: body
         in: body
         required: true
-        description: New module information
+        description: New component information
         schema:
-          $ref: '#/definitions/NewModule'
+          $ref: '#/definitions/NewComponent'
       responses:
         201:
-          description: The module was created
+          description: The component was created
           schema:
-            $ref: '#/definitions/Module'
+            $ref: '#/definitions/Component'
         401:
           description: Invalid credentials supplied
         404:
@@ -505,11 +507,11 @@ paths:
     get:
       security:
       - userAuth: []
-      description: See the modules associated with this client 
-      summary:  Get client's modules
+      description: See the components associated with this client 
+      summary:  Get client's components
       tags:
       - client
-      operationId: getModules
+      operationId: getComponents
       produces:
       - application/json
       parameters:
@@ -517,29 +519,29 @@ paths:
         in: path
         required: true
         type: integer
-        description: Get the modules of this client
+        description: Get the components of this client
       responses:
         200:
           description: OK
           schema:
             type: array
             items:
-              $ref: '#/definitions/Module'
+              $ref: '#/definitions/Component'
         401:
           description: Invalid credentials supplied
         404:
           description: The client does not exist
         
-  /clients/{clientID}/modules/{moduleID}:
-    x-swagger-router-controller: modules
+  /clients/{clientID}/components/{componentID}:
+    x-swagger-router-controller: components
     get:
       security:
       - userAuth: []
-      description: See a specific module of a client
-      summary:  Get a single module of the client
+      description: See a specific component of a client
+      summary:  Get a single component of the client
       tags:
       - client
-      operationId: getModuleById
+      operationId: getComponentById
       produces:
       - application/json
       parameters:
@@ -547,30 +549,30 @@ paths:
         in: path
         required: true
         type: integer
-        description: Get the modules of this client
-      - name: moduleID
+        description: Get the components of this client
+      - name: componentID
         in: path
         required: true
         type: integer
-        description: The module to get
+        description: The component to get
       responses:
         200:
           description: OK
           schema:
-           $ref: '#/definitions/Module'
+           $ref: '#/definitions/Component'
         401:
           description: Invalid credentials supplied
         404:
-          description: The client or module does not exist
+          description: The client or component does not exist
           
     delete:
       security:
       - userAuth: []
-      description: Delete a module of a client
-      summary:  Delete a single module of the client
+      description: Delete a component of a client
+      summary:  Delete a single component of the client
       tags:
       - client
-      operationId: deleteModuleById
+      operationId: deleteComponentById
       produces:
       - application/json
       parameters:
@@ -578,29 +580,29 @@ paths:
         in: path
         required: true
         type: integer
-        description: Get the modules of this client
-      - name: moduleID
+        description: Get the components of this client
+      - name: componentID
         in: path
         required: true
         type: integer
-        description: The module to delete
+        description: The component to delete
       responses:
         200:
           description: OK
         401:
           description: Invalid credentials supplied
         404:
-          description: The client or module does not exist
+          description: The client or component does not exist
           
   
 
-  /clients/{clientID}/modules/{moduleID}/permissions:
+  /clients/{clientID}/components/{componentID}/permissions:
     x-swagger-router-controller: permissions
     get:
       security:
       - userAuth: []
-      description: If the module has requested any new permissions, you can get them here.
-      summary:  See the permissions the module has requested
+      description: If this compoent has any accepted permssions, you can get them here.
+      summary:  See the permissions the component has been granted.
       tags:
       - client
       operationId: getPermissions
@@ -611,12 +613,12 @@ paths:
         in: path
         required: true
         type: integer
-        description: Get the modules of this client
-      - name: moduleID
+        description: Get the components of this client
+      - name: componentID
         in: path
         required: true
         type: integer
-        description: The module to get
+        description: The component to get
       responses:
         200:
           description: OK
@@ -627,16 +629,16 @@ paths:
         401:
           description: Invalid credentials supplied
         404:
-          description: The client or module does not exist, or you are not the client's admin.
+          description: The client or component does not exist, or you are not the client's admin.
   #   delete:
   
-  /clients/{clientID}/modules/{moduleID}/permissions/requested:
+  /clients/{clientID}/components/{componentID}/permissions/requested:
     x-swagger-router-controller: permissions
     get:
       security:
       - userAuth: []
-      description: If the module has requested any new permissions, you can get them here.
-      summary:  See the permissions the module has requested
+      description: If the component has requested any new permissions, you can get them here.
+      summary:  See the permissions the component has requested
       tags:
       - client
       operationId: getRequestedPermissions
@@ -647,12 +649,12 @@ paths:
         in: path
         required: true
         type: integer
-        description: Get the modules of this client
-      - name: moduleID
+        description: Get the components of this client
+      - name: componentID
         in: path
         required: true
         type: integer
-        description: The module to get
+        description: The component to get
       responses:
         200:
           description: OK
@@ -663,15 +665,15 @@ paths:
         401:
           description: Invalid credentials supplied
         404:
-          description: The client or module does not exist, or you are not the client's admin.
+          description: The client or component does not exist, or you are not the client's admin.
   
-  /clients/{clientID}/modules/{moduleID}/permissions/accept:
+  /clients/{clientID}/components/{componentID}/permissions/accept:
     x-swagger-router-controller: permissions
     post:
       security:
       - userAuth: []
-      description: Accept permissions that where requested by the module
-      summary:  Accept permissions that where requested by the module
+      description: Accept permissions that where requested by the component
+      summary:  Accept permissions that where requested by the component
       tags:
       - client
       operationId: acceptPermissions
@@ -682,12 +684,12 @@ paths:
         in: path
         required: true
         type: integer
-        description: Get the modules of this client
-      - name: moduleID
+        description: Get the components of this client
+      - name: componentID
         in: path
         required: true
         type: integer
-        description: The module to get
+        description: The component to get
       - name: body
         in: body
         required: true
@@ -708,9 +710,9 @@ paths:
         401:
           description: Invalid credentials supplied
         404:
-          description: The client or module does not exist, or you are not the client's admin.
+          description: The client or component does not exist, or you are not the client's admin.
 
-  /clients/{clientID}/modules/{moduleID}/permissions/revoke:
+  /clients/{clientID}/components/{componentID}/permissions/revoke:
     x-swagger-router-controller: permissions
     post:
       security:
@@ -727,12 +729,12 @@ paths:
         in: path
         required: true
         type: integer
-        description: Get the modules of this client
-      - name: moduleID
+        description: Get the components of this client
+      - name: componentID
         in: path
         required: true
         type: integer
-        description: The module to get
+        description: The component to get
       - name: body
         in: body
         required: true
@@ -753,17 +755,17 @@ paths:
         401:
           description: Invalid credentials supplied
         404:
-          description: The client or module does not exist, or you are not the client's admin.
+          description: The client or component does not exist, or you are not the client's admin.
   
-  /modules/requestPermissions:
+  /components/requestPermissions:
     x-swagger-router-controller: permissions
     post:
       security:
-      - moduleAuth: []
+      - componentAuth: []
       description: Request permissions. You should specify device defintions for any device permissions required. 
       summary:  Request permissions and define new devices
       tags:
-      - module
+      - component
       operationId: requestPermissions
       produces:
       - application/json
@@ -789,7 +791,7 @@ paths:
         400:
           description: Device already exists with a different prototype
         401:
-          description: The module key you supplied is invalid
+          description: The component key you supplied is invalid
 
 definitions:
 #defintions for clients and users
@@ -901,10 +903,10 @@ definitions:
     required:
     - email
     - admin
-    #module defintions
+    #component defintions
 
-  NewModule:
-    title: Module to create
+  NewComponent:
+    title: Component to create
     type: object
     properties:
       type:
@@ -923,11 +925,11 @@ definitions:
     - name
     - type
     
-  Module:
-    title: Module
+  Component:
+    title: Component
     type: object
     allOf:
-    - $ref: '#/definitions/NewModule'
+    - $ref: '#/definitions/NewComponent'
     properties:
       id:
         type: integer
@@ -942,7 +944,7 @@ definitions:
 
   Permission:
     type: object
-    title: Module Permission
+    title: Component Permission
     properties:
       type:
         type: string

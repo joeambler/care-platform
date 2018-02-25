@@ -23,16 +23,18 @@ module.exports = {
                 allowNull: false,
                 type: Sequelize.DATE
             },
-            ClientModuleId: {
+            ClientComponentId: {
                 type: Sequelize.INTEGER,
+                onDelete: "CASCADE",
                 references: {
-                    model: 'ClientModules',
+                    model: 'ClientComponents',
                     key: 'id'
                 }
             },
             AlertTypeId: {
                 type: Sequelize.INTEGER,
                 allowNull: true,
+                onDelete: "CASCADE",
                 references: {
                     model: 'AlertTypes',
                     key: 'id'
@@ -41,6 +43,7 @@ module.exports = {
             DeviceTypeId: {
                 type: Sequelize.INTEGER,
                 allowNull: true,
+                onDelete: "CASCADE",
                 references: {
                     model: 'DeviceTypes',
                     key: 'id'
@@ -49,6 +52,7 @@ module.exports = {
             EventTypeId: {
                 type: Sequelize.INTEGER,
                 allowNull: true,
+                onDelete: "CASCADE",
                 references: {
                     model: 'EventTypes',
                     key: 'id'

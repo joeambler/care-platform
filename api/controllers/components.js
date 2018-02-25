@@ -4,15 +4,15 @@ const models = require('../../models');
 const randomstring = require("randomstring");
 
 module.exports = {
-    newModule: newModule,
-    authenticateModule: authenticateModule,
-    getModules: getModules,
-    getModuleById: getModuleById,
-    deleteModuleById: deleteModuleById
+    newComponent: newComponent,
+    authenticateComponent: authenticateComponent,
+    getComponents: getComponents,
+    getComponentById: getComponentById,
+    deleteComponentById: deleteComponentById
 };
 
 
-function newModule(req, res) {
+function newComponent(req, res) {
     const body = req.swagger.params.body.value;
     const clientId = req.swagger.params.clientID.value;
     const user = req.User;
@@ -31,7 +31,7 @@ function newModule(req, res) {
         res.end();
     };
 
-    const moduleData = {
+    const componentData = {
         key: key,
         type: body.type,
         name: body.name,
@@ -42,19 +42,19 @@ function newModule(req, res) {
         if (clients.length < 1) return notFoundError();
         const client = clients[0];
 
-        models.ClientModule.create(moduleData).then((module) => {
+        models.ClientComponent.create(componentData).then((component) => {
             console.log(client);
-            module.setClient(client).then(() => {
-                moduleData.id = module.id;
-                moduleData.client = client.id;
-                res.status(201).json(moduleData);
+            component.setClient(client).then(() => {
+                componentData.id = component.id;
+                componentData.client = client.id;
+                res.status(201).json(componentData);
                 res.end();
             }, serverErrror);
         }, serverErrror);
     }, serverErrror);
 }
 
-function getModules(req, res) {
+function getComponents(req, res) {
     const clientId = req.swagger.params.clientID.value;
     const user = req.User;
 
@@ -73,20 +73,20 @@ function getModules(req, res) {
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
         .then(clients => {
             if (clients.length < 1) return notFoundError();
-            clients[0].getModules({attributes: ['id', 'name', 'apiEndPoint', 'key']}).then((modules) => {
-                const moduleObjects = [];
-                modules.forEach(m => {
-                    moduleObjects.push(m.get({plain: true}));
+            clients[0].getComponents({attributes: ['id', 'name', 'apiEndPoint', 'key']}).then((components) => {
+                const componentObjects = [];
+                components.forEach(m => {
+                    componentObjects.push(m.get({plain: true}));
                 });
-                res.status(200).json(moduleObjects);
+                res.status(200).json(componentObjects);
                 res.end();
             }, serverErrror);
         }, serverErrror);
 }
 
-function getModuleById(req, res) {
+function getComponentById(req, res) {
     const clientId = req.swagger.params.clientID.value;
-    const moduleID = req.swagger.params.moduleID.value;
+    const componentID = req.swagger.params.componentID.value;
     const user = req.User;
 
     const serverErrror = (err) => {
@@ -103,20 +103,20 @@ function getModuleById(req, res) {
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
         .then(clients => {
             if (clients.length < 1) return notFoundError();
-            clients[0].getModules({attributes: ['id', 'name', 'apiEndPoint', 'key'], where: {id: moduleID}})
-                .then(modules => {
-                    if (modules.length < 1) {
+            clients[0].getleles({attributes: ['id', 'name', 'apiEndPoint', 'key'], where: {id: componentID}})
+                .then(components => {
+                    if (components.length < 1) {
                         return notFoundError()
                     }
-                    res.status(200).json(modules[0].get({plain: true}));
+                    res.status(200).json(components[0].get({plain: true}));
                     res.end();
                 }, serverErrror);
         }, serverErrror);
 }
 
-function deleteModuleById(req, res) {
+function deleteComponentById(req, res) {
     const clientId = req.swagger.params.clientID.value;
-    const moduleID = req.swagger.params.moduleID.value;
+    const componentID = req.swagger.params.componentID.value;
     const user = req.User;
 
     const serverErrror = (err) => {
@@ -133,19 +133,19 @@ function deleteModuleById(req, res) {
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
         .then(clients => {
             if (clients.length < 1) return notFoundError();
-            clients[0].getModules({where: {id: moduleID}})
-                .then(modules => {
-                    if (modules.length < 1) {
+            clients[0].getComponents({where: {id: componentID}})
+                .then(components => {
+                    if (components.length < 1) {
                         return notFoundError()
                     }
-                    modules[0].destroy();
+                    components[0].destroy();
                     res.status(200).json();
                     res.end();
                 }, serverErrror);
         }, serverErrror);
 }
 
-function authenticateModule(req, authOrSecDef, scopesOrApiKey, callback) {
+function authenticateComponent(req, authOrSecDef, scopesOrApiKey, callback) {
     const unauthorizedCallback = (reason) => {
         console.log(reason);
         req.res.status(401).json();
@@ -156,12 +156,12 @@ function authenticateModule(req, authOrSecDef, scopesOrApiKey, callback) {
         return unauthorizedCallback("No value supplied");
     }
 
-    models.ClientModule.findOne({where: {key: scopesOrApiKey}}).then(module => {
-        if (module == null) {
+    models.ClientComponent.findOne({where: {key: scopesOrApiKey}}).then(component => {
+        if (component == null) {
             return unauthorizedCallback("Key does not match");
         }
         else {
-            req.Module = module;
+            req.Component = component;
             callback();
         }
     }, unauthorizedCallback);

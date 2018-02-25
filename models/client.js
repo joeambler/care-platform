@@ -21,8 +21,8 @@ module.exports = (sequelize, DataTypes) => {
             as: 'Users',
             foreignKey: 'clientId'
         });
-        Client.hasMany(models.ClientModule, {
-            as: 'Modules'
+        Client.hasMany(models.ClientComponent, {
+            as: 'Components'
         })
     };
     return Client;

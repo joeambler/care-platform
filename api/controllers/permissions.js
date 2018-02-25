@@ -11,10 +11,11 @@ module.exports = {
 };
 
 function requestPermissions(req, res) {
-    const module = req.Module;
+    const component = req.Component;
     const body = req.swagger.params.body.value;
 
-    const serverError = () => {
+    const serverError = (error) => {
+        console.log(error);
         res.status(500).json();
         res.end();
     };
@@ -35,7 +36,7 @@ function requestPermissions(req, res) {
 
     const checks = [permissionAndDevicesMatch(deviceDefinitions, permissions),
         getDefinitionConflicts(deviceDefinitions),
-        getModulePermissionsFlat(module, null, false)];
+        getComponentPermissionsFlat(component, null, false)];
 
 
     Promise.all(checks).then(([match, devicesComparison, existingPermissions]) => {
@@ -59,20 +60,20 @@ function requestPermissions(req, res) {
 
         console.log(devicesComparison);
         console.log(newPermissions);
-        addPermissionsAndDefinitions(newPermissions, devicesComparison, module).then(() => {
+        addPermissionsAndDefinitions(newPermissions, devicesComparison, component).then(() => {
             success();
         }, serverError)
     }, serverError);
 }
 
-function getModulePermissionsFlat(module, tentative, includeOriginal) {
+function getComponentPermissionsFlat(component, tentative, includeOriginal) {
     return new Promise((fulfill, reject) => {
         const options = {include: [models.EventType, models.AlertType, models.DeviceType]};
         if (tentative !== null){
             options.where = {tentative: tentative};
         }
 
-        module.getPermissions(options).then((permissions) => {
+        component.getPermissions(options).then((permissions) => {
             const flatPermissions = [];
             const databasePermissions = [];
             permissions.forEach(p => {
@@ -158,21 +159,21 @@ function getDefinitionConflicts(deviceDefinitions) {
     });
 }
 
-function addPermissionsAndDefinitions(permissions, devicesComparison, module) {
+function addPermissionsAndDefinitions(permissions, devicesComparison, component) {
     return models.sequelize.transaction(function (t) {
         const devicePermissions = permissions.filter(p => {
             return p.type === 'device';
         });
 
-        const promises = [addDeviceDefinitionsAndPermissions(t, devicePermissions, devicesComparison, module),
-            addPermissionsByType(t, 'event', permissions, models.EventType, module),
-            addPermissionsByType(t, 'alert', permissions, models.AlertType, module)];
+        const promises = [addDeviceDefinitionsAndPermissions(t, devicePermissions, devicesComparison, component),
+            addPermissionsByType(t, 'event', permissions, models.EventType, component),
+            addPermissionsByType(t, 'alert', permissions, models.AlertType, component)];
 
         return Promise.all(promises);
     });
 }
 
-function addDeviceDefinitionsAndPermissions(t, devicePermissions, devicesComparison, module) {
+function addDeviceDefinitionsAndPermissions(t, devicePermissions, devicesComparison, component) {
     return models.DeviceType.bulkCreate(devicesComparison.devicesToCreate, {transaction: t})
         .then((devices) => {
             devices = devices.concat(devicesComparison.compatibleDevices);
@@ -180,14 +181,14 @@ function addDeviceDefinitionsAndPermissions(t, devicePermissions, devicesCompari
                 const promises = [];
                 ps.forEach(p => {
                     promises.push(p.setDeviceType(devices.pop(), {transaction: t}));
-                    promises.push(module.addPermission(p, {transaction: t}));
+                    promises.push(component.addPermission(p, {transaction: t}));
                 });
                 return Promise.all(promises);
             });
         });
 }
 
-function addPermissionsByType(t, type, permissions, model, module) {
+function addPermissionsByType(t, type, permissions, model, component) {
     const promises = [];
     const permissionsOfType = permissions.filter(p => p.type === type);
 
@@ -201,7 +202,7 @@ function addPermissionsByType(t, type, permissions, model, module) {
                 promises.push(type === 'event' ? p.setEventType(instance, {transaction: t}) :
                     type === 'alert' ? p.setAlertType(instance, {transaction: t}) :
                         null);
-                promises.push(module.addPermission(p, {transaction: t}));
+                promises.push(component.addPermission(p, {transaction: t}));
                 return Promise.all(promises);
             })
         ));
@@ -211,16 +212,16 @@ function addPermissionsByType(t, type, permissions, model, module) {
 }
 
 function getPermissions(req, res) {
-    getModulePermissionsREST(req, res, false)
+    getComponentPermissionsREST(req, res, false)
 }
 
 function getRequestedPermissions(req, res) {
-    getModulePermissionsREST(req, res, true)
+    getComponentPermissionsREST(req, res, true)
 }
 
-function getModulePermissionsREST(req, res, tentative) {
+function getComponentPermissionsREST(req, res, tentative) {
     const clientId = req.swagger.params.clientID.value;
-    const moduleID = req.swagger.params.moduleID.value;
+    const componentID = req.swagger.params.componentID.value;
     const user = req.User;
 
     const serverError = (err) => {
@@ -238,12 +239,12 @@ function getModulePermissionsREST(req, res, tentative) {
         if (clients.length < 1) {
             return notFoundError();
         }
-        clients[0].getModules({where: {id: moduleID}}).then(modules => {
-            if (modules.length < 1) {
+        clients[0].getComponents({where: {id: componentID}}).then(components => {
+            if (components.length < 1) {
                 return notFoundError();
             }
 
-            getModulePermissionsFlat(modules[0], tentative, false).then(permissions => {
+            getComponentPermissionsFlat(components[0], tentative, false).then(permissions => {
                 res.status(200).json(permissions);
                 res.end();
             }, serverError);
@@ -261,7 +262,7 @@ function revokePermissions(req, res) {
 
 function changePermissionStatusREST(req, res, setTentative) {
     const clientId = req.swagger.params.clientID.value;
-    const moduleID = req.swagger.params.moduleID.value;
+    const componentID = req.swagger.params.componentID.value;
     const permissionsToChange = req.swagger.params.body.value;
     const user = req.User;
 
@@ -280,12 +281,12 @@ function changePermissionStatusREST(req, res, setTentative) {
         if (clients.length < 1) {
             return notFoundError();
         }
-        clients[0].getModules({where: {id: moduleID}}).then(modules => {
-            if (modules.length < 1) {
+        clients[0].getComponents({where: {id: componentID}}).then(components => {
+            if (components.length < 1) {
                 return notFoundError();
             }
 
-            getModulePermissionsFlat(modules[0], !setTentative, true).then((flatPermissions) => {
+            getComponentPermissionsFlat(components[0], !setTentative, true).then((flatPermissions) => {
                 const nonExistentPermissions = [];
                 const permissionsToUpdate = [];
                 permissionsToChange.forEach(p => {
