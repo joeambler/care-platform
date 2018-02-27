@@ -75,7 +75,6 @@ function getComponentPermissionsFlat(component, tentative, includeOriginal) {
 
         component.getPermissions(options).then((permissions) => {
             const flatPermissions = [];
-            const databasePermissions = [];
             permissions.forEach(p => {
                 let name;
                 switch (p.type) {
@@ -115,6 +114,8 @@ function permissionAndDevicesMatch(deviceDefinitions, permissions) {
         const devicePermissions = permissions.filter(p => {
             return p.type === 'device';
         });
+
+        if (devicePermissions.length === 0 && typeof deviceDefinitions === 'undefined') return fulfill(true);
         const correctlyDefinedPermissions = devicePermissions.filter(p => {
             return deviceDefinitions.filter(device => {
                 console.log([device.type, p.name]);
@@ -138,6 +139,8 @@ function DevicesComparison() {
 function getDefinitionConflicts(deviceDefinitions) {
     return new Promise((fulfill, reject) => {
         const comparison = new DevicesComparison();
+        if (typeof deviceDefinitions === 'undefined') return fulfill(comparison);
+
 
         const devicesInDb = [];
         deviceDefinitions.forEach(d => devicesInDb.push(models.DeviceType.findOne({where: {type: d.type}})));
