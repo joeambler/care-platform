@@ -630,7 +630,6 @@ paths:
           description: Invalid credentials supplied
         404:
           description: The client or component does not exist, or you are not the client's admin.
-  #   delete:
   
   /clients/{clientID}/components/{componentID}/permissions/requested:
     x-swagger-router-controller: permissions
@@ -792,6 +791,47 @@ paths:
           description: Device already exists with a different prototype
         401:
           description: The component key you supplied is invalid
+
+  /components/events:
+    x-swagger-router-controller: events
+    post:
+      security:
+      - componentAuth: []
+      description: 'You should include information on the device that has emitted it, along with its event type and
+      any extra details'
+      summary:  Send an information on a new event
+      tags:
+      - component
+      operationId: postEvent
+      produces:
+      - application/json
+      parameters:
+      - name: body
+        in: body
+        required: true
+        description: Event
+        schema:
+          type: object
+          required:
+          - type
+          - deviceInstance
+          - details
+          properties:
+            type:
+              type: string
+              example: 'Opened'
+            details:
+              type: string
+              example: 'The pill box was opened'
+            deviceInstance:
+              $ref: '#/definitions/DeviceInstance'
+      responses:
+        200:
+          description: The event was recieved correctly
+        401:
+          description: 'The component key you supplied is invalid, or the user has not granted the required
+          permissions to post this event.'
+
 
 definitions:
 #defintions for clients and users
@@ -973,7 +1013,20 @@ definitions:
     required:
     - type
     - prototype
-        
+
+  DeviceInstance:
+    type: object
+    title: Device Instance
+    properties:
+      type:
+        type: string
+        example: Pill Box
+      properties:
+        type: string
+        example: "{\"location\": \"Kitchen\"}"
+    required:
+    - type
+    - properties
         
     #other definitions
   Empty:
