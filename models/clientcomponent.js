@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     ClientModule.associate = function (models) {
         ClientModule.hasMany(models.Permission);
         ClientModule.belongsTo(models.Client);
+        ClientModule.hasMany(models.Event, {foreignKey : 'componentId'});
     };
     return ClientModule;
 };

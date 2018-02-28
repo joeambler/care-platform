@@ -1,8 +1,10 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
     const DeviceInstance = sequelize.define('DeviceInstance', {
-        properties: DataTypes.STRING,
-        allowNull: false
+        properties: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     });
 
     DeviceInstance.associate = (models) => {

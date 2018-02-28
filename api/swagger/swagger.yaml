@@ -755,6 +755,54 @@ paths:
           description: Invalid credentials supplied
         404:
           description: The client or component does not exist, or you are not the client's admin.
+
+  /clients/{clientID}/components/{componentID}/events:
+      x-swagger-router-controller: events
+      get:
+        security:
+        - userAuth: []
+        description: Get events from this component
+        summary:  Get events from this component
+        tags:
+        - client
+        operationId: getComponentEvents
+        produces:
+        - application/json
+        parameters:
+        - name: clientID
+          in: path
+          required: true
+          type: integer
+          description: Get the components of this client
+        - name: componentID
+          in: path
+          required: true
+          type: integer
+          description: Get events from this component
+        responses:
+          200:
+            description: Events
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                - type
+                - deviceInstance
+                - details
+                properties:
+                  type:
+                    type: string
+                    example: 'Opened'
+                  details:
+                    type: string
+                    example: 'The pill box was opened'
+                  deviceInstance:
+                    $ref: '#/definitions/DeviceInstance'
+          401:
+            description: Invalid credentials supplied
+          404:
+            description: The client or component does not exist
   
   /components/requestPermissions:
     x-swagger-router-controller: permissions

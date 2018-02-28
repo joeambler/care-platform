@@ -4,13 +4,63 @@ const models = require('../../models');
 
 module.exports = {
     postEvent: postEvent,
-    getEvents: getEvents
+    getComponentEvents: getComponentEvents
 
 };
 
-function getEvents(req, res) {
+function getComponentEvents(req, res) {
+    const clientId = req.swagger.params.clientID.value;
+    const componentID = req.swagger.params.componentID.value;
+    const user = req.User;
+
+    const serverError = (err) => {
+        console.log("Cannot get: " + err);
+        res.status(500).json();
+        res.end();
+    };
+
+    const notFoundError = () => {
+        res.status(404).json();
+        res.end();
+    };
+
+    user.getClients({where: {id: clientId}}).then(clients => {
+        if (clients.length < 1) {
+            return notFoundError();
+        }
+        clients[0].getComponents({where: {id: componentID}}).then(components => {
+            if (components.length < 1) {
+                return notFoundError();
+            }
+
+            components[0].getEvents({
+                include: [
+                    {
+                        model: models.DeviceInstance,
+                        include: [models.DeviceType]
+                    },
+                    models.EventType
+                ]
+            }).then((events) => {
+                let jsonOutput = [];
+                events.forEach(e => {
+                    jsonOutput.push({
+                        type: e.EventType.type,
+                        details: e.details,
+                        deviceInstance: {
+                            type: e.DeviceInstance.DeviceType.type,
+                            properties: e.DeviceInstance.properties
+                        }
+                    })
+                });
+                res.status(200).json(jsonOutput);
+                res.end();
+            }, serverError);
+        }, serverError);
+    }, serverError);
 
 }
+
 
 function postEvent(req, res) {
     const component = req.Component;
