@@ -374,7 +374,7 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
     if (token) {
         jwt.verify(token, req.app.get('JWTSecret'), function (err, decoded_token_body) {
             if (err) {
-                console.log("Error Decoding Token");
+                return unauthorizedCallback("Error Decoding Token");
             } else {
                 if (!decoded_token_body) {
                     return unauthorizedCallback("Invalid Token");

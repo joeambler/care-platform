@@ -4,8 +4,8 @@ const models = require('../../models');
 
 module.exports = {
     postEvent: postEvent,
-    getComponentEvents: getComponentEvents
-
+    getComponentEvents: getComponentEvents,
+    getAllEvents: getAllEvents
 };
 
 function getComponentEvents(req, res) {
@@ -13,6 +13,17 @@ function getComponentEvents(req, res) {
     const componentID = req.swagger.params.componentID.value;
     const user = req.User;
 
+    getEvents(res, user, clientId, true, componentID);
+}
+
+function getAllEvents(req, res) {
+    const clientId = req.swagger.params.clientID.value;
+    const user = req.User;
+
+    getEvents(res, user, clientId, false);
+}
+
+function getEvents(res, user, clientId, limitComponent, componentID) {
     const serverError = (err) => {
         console.log("Cannot get: " + err);
         res.status(500).json();
@@ -28,39 +39,60 @@ function getComponentEvents(req, res) {
         if (clients.length < 1) {
             return notFoundError();
         }
-        clients[0].getComponents({where: {id: componentID}}).then(components => {
+
+        const options = limitComponent ? {where: {id: componentID}} : {};
+        clients[0].getComponents(options).then(components => {
             if (components.length < 1) {
                 return notFoundError();
             }
 
-            components[0].getEvents({
-                include: [
-                    {
-                        model: models.DeviceInstance,
-                        include: [models.DeviceType]
-                    },
-                    models.EventType
-                ]
-            }).then((events) => {
-                let jsonOutput = [];
-                events.forEach(e => {
-                    jsonOutput.push({
-                        type: e.EventType.type,
-                        details: e.details,
-                        deviceInstance: {
-                            type: e.DeviceInstance.DeviceType.type,
-                            properties: e.DeviceInstance.properties
-                        }
-                    })
-                });
-                res.status(200).json(jsonOutput);
+            let jsonOutputPromises = [];
+            components.forEach(c => {
+                jsonOutputPromises.push(getJSONEventsFromComponent(c));
+            });
+
+            Promise.all(jsonOutputPromises).then(jsonOutput => {
+                console.log(jsonOutput);
+                let jsonOutputFlat = [];
+                jsonOutput.forEach(o => jsonOutputFlat = jsonOutputFlat.concat(o));
+
+                res.status(200).json(jsonOutputFlat);
                 res.end();
-            }, serverError);
+            }, serverError)
+
+
         }, serverError);
     }, serverError);
-
 }
 
+function getJSONEventsFromComponent(component) {
+    return new Promise((fulfill, reject) => {
+        component.getEvents({
+            include: [
+                {
+                    model: models.DeviceInstance,
+                    include: [models.DeviceType]
+                },
+                models.EventType
+            ]
+        }).then(events => {
+            let jsonOutput = [];
+            events.forEach(e => {
+                jsonOutput.push({
+                    component: component.name,
+                    type: e.EventType.type,
+                    details: e.details,
+                    date: e.date,
+                    deviceInstance: {
+                        type: e.DeviceInstance.DeviceType.type,
+                        properties: e.DeviceInstance.properties
+                    }
+                })
+            });
+            fulfill(jsonOutput);
+        }, reject);
+    });
+}
 
 function postEvent(req, res) {
     const component = req.Component;

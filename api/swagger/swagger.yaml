@@ -756,6 +756,35 @@ paths:
         404:
           description: The client or component does not exist, or you are not the client's admin.
 
+
+  /clients/{clientID}/events:
+      x-swagger-router-controller: events
+      get:
+        security:
+        - userAuth: []
+        description: Get events for all components of this client.
+        summary:  Get all events
+        tags:
+        - client
+        operationId: getAllEvents
+        produces:
+        - application/json
+        parameters:
+        - name: clientID
+          in: path
+          required: true
+          type: integer
+          description: Get the components of this client
+        responses:
+          200:
+            description: Events
+            schema:
+              $ref: '#/definitions/EventsList'
+          401:
+            description: Invalid credentials supplied
+          404:
+            description: The client does not exist or has no components
+
   /clients/{clientID}/components/{componentID}/events:
       x-swagger-router-controller: events
       get:
@@ -783,22 +812,7 @@ paths:
           200:
             description: Events
             schema:
-              type: array
-              items:
-                type: object
-                required:
-                - type
-                - deviceInstance
-                - details
-                properties:
-                  type:
-                    type: string
-                    example: 'Opened'
-                  details:
-                    type: string
-                    example: 'The pill box was opened'
-                  deviceInstance:
-                    $ref: '#/definitions/DeviceInstance'
+              $ref: '#/definitions/EventsList'
           401:
             description: Invalid credentials supplied
           404:
@@ -1075,6 +1089,31 @@ definitions:
     required:
     - type
     - properties
+
+  #Events definitions
+  EventsList:
+    type: array
+    items:
+      type: object
+      required:
+      - type
+      - deviceInstance
+      - details
+      properties:
+        component:
+          type: string
+          example: 'Pill Box Component'
+        date:
+          type: string
+          example: '2018-02-27T18:42:29.000Z'
+        type:
+          type: string
+          example: 'Opened'
+        details:
+          type: string
+          example: 'The pill box was opened'
+        deviceInstance:
+          $ref: '#/definitions/DeviceInstance'
         
     #other definitions
   Empty:
