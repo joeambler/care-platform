@@ -25,6 +25,7 @@ function createUser(req, res) {
 
     if (!emailValidator.validate(body.email)) {
         res.status(406).json("Invalid email address");
+        res.end();
         return;
     }
 
