@@ -2,6 +2,6 @@ const path = require('path');
 
 module.exports = {
   "config": path.resolve(__dirname + '/config', 'config.js'),
-  "models-path": path.resolve(__dirname + '/src/models'),
+  "models-path": path.resolve(__dirname + '/api/models'),
   "migrations-path": path.resolve(__dirname + '/migrations')
 };
