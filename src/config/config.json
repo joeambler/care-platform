@@ -1,0 +1,11 @@
+{
+  //set environment variables accordingly
+
+  "development": {
+    "username": "platform",
+    "password": "IEoQc02eVB1F0uIeZHoLj5yLXGZbRH8w5vuzPxK7S",
+    "database": "platform",
+    "host": "care-platform.cxoejxmvijh4.eu-west-2.rds.amazonaws.com",
+    "dialect": "mysql"
+  }
+}

@@ -19,7 +19,7 @@ const config = {
 const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
-const swaggerDocument = YAML.load('./api/swagger/swagger.yaml');
+const swaggerDocument = YAML.load(__dirname + '/api/swagger/swagger.yaml');
 
 if (process.env.NODE_ENV === 'production'){
     swaggerDocument.host = process.env.HOST;

@@ -1,6 +1,6 @@
 'use strict';
 
-const models = require('../../models');
+const models = require('../models/index');
 
 module.exports = {
     postEvent: postEvent,

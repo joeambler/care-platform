@@ -1,6 +1,6 @@
 'use strict';
 
-const models = require('../../models');
+const models = require('../models/index');
 const userController = require('./users');
 const randomstring = require("randomstring");
 

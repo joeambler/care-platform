@@ -1,7 +1,7 @@
 'use strict';
 
 const emailValidator = require("email-validator");
-const models = require('../../models');
+const models = require('../models/index');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');

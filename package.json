@@ -2,9 +2,9 @@
   "name": "care-platform",
   "version": "0.0.0",
   "description": "Care platform to enable assisted living.",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node src/server.js",
     "test": "swagger project test"
   },
   "repository": {
@@ -24,8 +24,11 @@
   },
   "homepage": "https://github.com/joeambler/care-platform#readme",
   "devDependencies": {
-    "should": "^7.1.0",
-    "supertest": "^1.0.0"
+    "nodeunit": "latest",
+    "sequelize-cli": "latest",
+    "swagger-node-codegen": "latest",
+    "nodemon": "latest"
+
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
