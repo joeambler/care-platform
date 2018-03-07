@@ -5,7 +5,7 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "nodeunit test/userManagementTest.js"
+    "test": "nodeunit test/userManagementTest.js test/clientManagementTest.js"
   },
   "repository": {
     "type": "git",
