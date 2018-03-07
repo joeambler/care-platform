@@ -8,7 +8,7 @@ module.exports = {
         this.responseStatus = [];
         this.responseJSON = [];
 
-        TestVariables.executeActions(this, UserManagementActions.getActions(callback));
+        UserManagementActions.executeActions(this, callback);
     },
     tearDown: function (callback) {
         for (let i = 0; i < this.responseJSON.length; i++) {

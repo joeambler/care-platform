@@ -12,7 +12,16 @@ const req = TestVariables.reqSkeleton({
 module.exports = {
     getTestUser: () => user,
 
-    getActions: (finalCallback) => [
+    executeActions: (variables, callback) =>
+        TestVariables.executeActions(variables, getActions(callback)),
+
+    createUser: createUser,
+    loginUser: loginUser,
+    deleteUser: deleteUser
+};
+
+function  getActions (finalCallback) {
+    return [
         createUser,
         loginUserBadPassword,
         loginUser,
@@ -23,12 +32,8 @@ module.exports = {
         deleteUser,
         getUser,
         finalCallback
-    ],
-
-    createUser: createUser,
-    loginUser: loginUser,
-    deleteUser: deleteUser
-};
+    ];
+}
 
 function createUser(variables, callback) {
     UserController.createUser(req, TestVariables.resSkeleton(variables, callback));

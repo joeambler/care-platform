@@ -14,7 +14,14 @@ let req = TestVariables.reqSkeleton({
 module.exports = {
     getTestclient: () => client,
 
-    getActions: (finalCallback) => [
+    executeActions: (variables, callback) =>
+        TestVariables.executeActions(variables, getActions(callback)),
+
+    createClient: createClient
+};
+
+function getActions(finalCallback) {
+    return [
         UserManagementActions.createUser,
         UserManagementActions.loginUser,
         createClient,
@@ -23,23 +30,21 @@ module.exports = {
         getClient,
         UserManagementActions.deleteUser,
         finalCallback
-    ],
-
-    createClient: createClient
-};
+    ]
+}
 
 function createClient(variables, callback) {
     req.res = TestVariables.resSkeleton(variables, () => saveClientID(variables, callback));
     UserController.verifyJWT(req, null, "Bearer " + variables.JWT, () => ClientController.postUsersClients(req, req.res));
 }
 
-function saveClientID(variables, callback){
+function saveClientID(variables, callback) {
     const json = variables.responseJSON;
     variables.clientID = json[json.length - 1].id;
     callback();
 }
 
-function getClient(variables, callback){
+function getClient(variables, callback) {
     req = TestVariables.reqSkeleton({
         clientID: {
             value: variables.clientID
