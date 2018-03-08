@@ -4,6 +4,7 @@ const SwaggerExpress = require('swagger-express-mw');
 const app = require('express')();
 const userContoller = require('./api/controllers/users');
 const componentController = require('./api/controllers/components');
+const url = require('url');
 
 module.exports = app; // for testing
 
@@ -15,21 +16,20 @@ const config = {
     }
 };
 
+const baseURL = process.env.NODE_ENV === 'production'?
+    swaggerDocument.host = process.env.HOST
+    : 'http://localhost:10010/v0';
+
 //DOCS
-const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load(__dirname + '/api/swagger/swagger.yaml');
 
-if (process.env.NODE_ENV === 'production'){
-    swaggerDocument.host = process.env.HOST;
-}
+swaggerDocument.host = baseURL;
 
-
+app.use('/spec.json', (req, res) => res.send(swaggerDocument));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.get('/', function (req, res) {
-    res.redirect('/api-docs');
-});
+app.get('/', (req, res) => res.redirect('/api-docs'));
 //END DOCS
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {
@@ -62,5 +62,5 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
     }
 
 });
-console.log('View Docs at:\t\thttp://localhost:10010/api-docs');
-console.log('API endpoint:\t\thttp://localhost:10010/v0');
+console.log('View Docs at:\t\t' + url.resolve(baseURL, "../api-docs"));
+console.log('API endpoint:\t\t' + baseURL);
