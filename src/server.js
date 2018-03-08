@@ -17,7 +17,7 @@ const config = {
 };
 
 const baseURL = process.env.NODE_ENV === 'production'?
-    swaggerDocument.host = process.env.HOST
+    process.env.HOST
     : 'http://localhost:10010/v0';
 
 //DOCS
