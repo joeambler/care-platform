@@ -35,7 +35,6 @@ app.use('/spec.yaml', (req, res) => res.send("YAML document coming soon."));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-//app.get('/', (req, res) => res.redirect('/api-docs'));
 app.get('/', (req, res) => sendHomepage(res));
 //END DOCS
 
