@@ -28,7 +28,6 @@
     "sequelize-cli": "latest",
     "swagger-node-codegen": "latest",
     "nodemon": "latest"
-
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
@@ -42,6 +41,7 @@
     "sequelize": "^4.32.2",
     "swagger-express-mw": "latest",
     "swagger-ui-express": "latest",
+    "yaml-js": "^0.2.3",
     "yamljs": "^0.3.0"
   }
 }

@@ -18,7 +18,7 @@ const config = {
 
 const baseURL = process.env.NODE_ENV === 'production'?
     process.env.HOST
-    : 'http://localhost:10010/v0';
+    : 'localhost:10010';
 
 //DOCS
 const swaggerUi = require('swagger-ui-express');
@@ -28,9 +28,13 @@ const swaggerDocument = YAML.load(__dirname + '/api/swagger/swagger.yaml');
 swaggerDocument.host = baseURL;
 
 app.use('/spec.json', (req, res) => res.send(swaggerDocument));
-app.use('/spec.yaml', (req, res) => res.send(YAML.stringify(swaggerDocument)));
+
+//TODO: Impliment YAML spec
+//app.use('/spec.yaml', (req, res) => res.send(yaml.dump_all(swaggerDocument)));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+//TODO: Homepage
 app.get('/', (req, res) => res.redirect('/api-docs'));
 //END DOCS
 
@@ -64,5 +68,8 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
     }
 
 });
-console.log('View Docs at:\t\t' + url.resolve(baseURL, "../api-docs"));
-console.log('API endpoint:\t\t' + baseURL);
+const activeProtocol = "http://";
+console.log('View Docs at:\t\t' + url.resolve(activeProtocol + baseURL, "/api-docs"));
+console.log('Download Spec (JSON):\t' + url.resolve(activeProtocol + baseURL, "/spec.json"));
+console.log('Download Spec (YAML):\t' + url.resolve(activeProtocol + baseURL, "/spec.yaml"));
+console.log('API endpoint:\t\t' + url.resolve(activeProtocol +baseURL,"/v0"));
