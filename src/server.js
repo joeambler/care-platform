@@ -28,6 +28,8 @@ const swaggerDocument = YAML.load(__dirname + '/api/swagger/swagger.yaml');
 swaggerDocument.host = baseURL;
 
 app.use('/spec.json', (req, res) => res.send(swaggerDocument));
+app.use('/spec.yaml', (req, res) => res.send(YAML.stringify(swaggerDocument)));
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.get('/', (req, res) => res.redirect('/api-docs'));
 //END DOCS
