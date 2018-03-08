@@ -77,7 +77,7 @@ console.log('API endpoint:\t\t' + url.resolve(activeProtocol +baseURL,"/v0"));
 
 
 function sendHomepage(res) {
-    res.send("<h1>Care Platform</h1><h2>View Documentation and test calls</h2><a href ="
+    res.send("<h1>Care Platform</h1><h2>View Documentation</h2><a href ="
         + "/api-docs"
         + ">Click here</a><h2>OpenAPI Specification (JSON)</h2><a href ="
         + "/spec.json"
