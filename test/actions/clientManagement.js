@@ -9,11 +9,6 @@ const SilentAction = HelperFunctions.SilentAction;
 const RecordedAction = HelperFunctions.RecordedAction;
 
 const client = TestVariables.newClient;
-let req = HelperFunctions.reqSkeleton({
-    body: {
-        value: client
-    }
-});
 
 module.exports = {
     getTestClient: () => client,
@@ -22,6 +17,7 @@ module.exports = {
         HelperFunctions.executeActions(variables, getActions(), callback),
 
     createClient: createClient,
+    deleteClient: deleteClient,
     saveClientIDJsonHandler: saveClientIDJsonHandler
 };
 
@@ -38,6 +34,11 @@ function getActions() {
 }
 
 function createClient(response, callback) {
+    const req = HelperFunctions.reqSkeleton({
+        body: {
+            value: client
+        }
+    });
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => ClientController.postUsersClients(req, req.res));
 }
@@ -47,7 +48,7 @@ function saveClientIDJsonHandler (json, variables)  {
 }
 
 function getClient(response, callback) {
-    req = HelperFunctions.reqSkeleton({
+    const req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         }
@@ -57,7 +58,7 @@ function getClient(response, callback) {
 }
 
 function deleteClient(response, callback) {
-    req = HelperFunctions.reqSkeleton({
+    const req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         },

@@ -51,7 +51,6 @@ module.exports = {
     resSkeleton: (response, callback) => {
         return {
             status: (status) => {
-                console.log(response);
                 response.status = status;
                 return {
                     json: (json) => {

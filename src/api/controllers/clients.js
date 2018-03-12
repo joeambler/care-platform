@@ -60,7 +60,6 @@ function postUsersClients(req, res) {
     };
 
     const success = (client, name) => {
-        console.log(client);
         req.res.status(201).json({
             id: client.id,
             name: {
@@ -80,8 +79,6 @@ function postUsersClients(req, res) {
     };
 
     const linkClient = client => {
-        console.log(client.id);
-        console.log(user.id);
         return user.addClient(client, {through: {admin: true, tentative: false}})
     };
 

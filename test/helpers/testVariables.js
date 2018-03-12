@@ -18,5 +18,11 @@ module.exports = {
             firstNames: "Client",
             surnames: "Client"
         }
+    },
+
+    newEventComponent: {
+            type: "event",
+            name: "Pill Box"
     }
+
 };

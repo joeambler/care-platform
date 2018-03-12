@@ -6,11 +6,6 @@ const HelperFunctions = require('../helpers/helperFunctions.js');
 const RecordedAction = HelperFunctions.RecordedAction;
 
 const user = TestVariables.newUser;
-const req = HelperFunctions.reqSkeleton({
-    body: {
-        value: user
-    }
-});
 
 module.exports = {
     getTestUser: () => user,
@@ -39,36 +34,63 @@ function getActions() {
 }
 
 function createUser(response, callback) {
+    const req = HelperFunctions.reqSkeleton({
+        body: {
+            value: user
+        }
+    });
     UserController.createUser(req, HelperFunctions.resSkeleton(response, callback));
 }
 
 function loginUserBadPassword(response, callback) {
+    const req = HelperFunctions.reqSkeleton({
+        body: {
+            value: user
+        }
+    });
     req.swagger.params.body.value.password = "notthepassword";
     UserController.loginUser(req, HelperFunctions.resSkeleton(response, callback));
 }
 
 function loginUser(response, callback) {
+    const req = HelperFunctions.reqSkeleton({
+        body: {
+            value: user
+        }
+    });
     req.swagger.params.body.value.password = "password";
     UserController.loginUser(req, HelperFunctions.resSkeleton(response, callback));
 }
 
 function getUser(response, callback) {
+    const req = HelperFunctions.reqSkeleton({});
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => UserController.getUser(req, req.res));
 }
 
 function getUserBadToken(response, callback) {
+    const req = HelperFunctions.reqSkeleton({});
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + "zzaz", () => UserController.getUser(req, req.res));
 }
 
 function changeUserName(response, callback) {
+    const req = HelperFunctions.reqSkeleton({
+        body: {
+            value: user
+        }
+    });
     req.swagger.params.body.value.name.firstNames = "Jake";
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => UserController.updateUser(req, req.res));
 }
 
 function deleteUser(response, callback) {
+    const req = HelperFunctions.reqSkeleton({
+        body: {
+            value: user
+        }
+    });
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => UserController.deleteUser(req, req.res));
 }
