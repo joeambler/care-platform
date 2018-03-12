@@ -4,13 +4,40 @@ const randomstring = require("randomstring");
 const app = require('../src/server.js');
 
 module.exports = {
-    executeActions: function executeActions (variables, actions) {
+    executeActions: function executeActions(variables, actions, finalCallback) {
+        variables.responses = variables.responses === undefined ? [] : variables.responses;
+        console.log(variables);
+
         const currentAction = actions[0];
-        if (actions.length === 1) {
-            currentAction();
+        if (actions.length === 0) {
+            finalCallback();
         } else {
             actions.shift();
-            currentAction(variables, () => executeActions(variables, actions));
+            const response = new Response(variables, currentAction.jsonHandler);
+            if (currentAction.record) {
+                variables.responses.push(response)
+            }
+            currentAction.action(response, () => executeActions(variables, actions, finalCallback));
+        }
+    },
+
+    RecordedAction: function (func, jsonHandler) {
+        this.action = func;
+        this.record = true;
+        this.jsonHandler = jsonHandler === undefined ? (json) => {} : jsonHandler;
+    },
+
+    SilentAction: function (func, jsonHandler) {
+        this.action = func;
+        this.record = false;
+        this.jsonHandler = jsonHandler === undefined ? (json) => {} : jsonHandler;
+    },
+
+    printResponses: (responses) => {
+        for (let i = 0; i < responses.length; i++) {
+            console.log("----Action Output " + i + "-----");
+            console.log("Status: " + responses[i].status);
+            console.log("Status: " + responses[i].json);
         }
     },
 
@@ -23,13 +50,14 @@ module.exports = {
         }
     },
 
-    resSkeleton: (variables, callback) => {
+    resSkeleton: (response, callback) => {
         return {
             status: (status) => {
-                variables.responseStatus.push(status);
+                console.log(response);
+                response.status = status;
                 return {
                     json: (json) => {
-                        variables.responseJSON.push(json);
+                        response.setJson(json);
                     }
                 };
             },
@@ -54,5 +82,14 @@ module.exports = {
             surnames: "Client"
         }
     }
-
 };
+
+function Response(variables, jsonHandler) {
+    this.setJson = (json) => {
+        this.json = json;
+        jsonHandler(json, variables);
+    };
+
+    this.variables = variables;
+}
+

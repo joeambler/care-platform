@@ -5,26 +5,19 @@ const ClientManagementActions = require('./clientManagementActions.js');
 
 module.exports = {
     setUp: function (callback) {
-        this.responseStatus = [];
-        this.responseJSON = [];
-
         ClientManagementActions.executeActions(this, callback);
     },
     tearDown: function (callback) {
-        for (let i = 0; i < this.responseJSON.length; i++) {
-            console.log("----Action Output " + i + "-----");
-            console.log("Status: " + this.responseStatus[i]);
-            console.log("Status: " + this.responseJSON[i]);
-        }
+        TestVariables.printResponses(this.responses);
         callback();
     },
     clientTests: function (test) {
-        test.equals(this.responseStatus[2], 201, "Client should be created successfully");
-        test.equals(this.responseStatus[3], 200, "Client be gettable");
-        test.equals(this.responseJSON[3].name.firstNames, ClientManagementActions.getTestclient().name.firstNames,
+        test.equals(this.responses[0].status, 201, "Client should be created successfully");
+        test.equals(this.responses[1].status, 200, "Client be gettable");
+        test.equals(this.responses[1].json.name.firstNames, ClientManagementActions.getTestClient().name.firstNames,
             "Client return should match what was posted");
-        test.equals(this.responseStatus[4], 200, "Client should be deleted successfully");
-        test.equals(this.responseStatus[5], 404, "Deleted client should not be 404-Not found");
+        test.equals(this.responses[2].status, 200, "Client should be deleted successfully");
+        test.equals(this.responses[3].status, 404, "Deleted client should not be 404-Not found");
         test.done();
     }
 };

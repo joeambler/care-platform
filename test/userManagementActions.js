@@ -2,6 +2,9 @@
 const UserController = require('../src/api/controllers/users.js');
 const TestVariables = require('./testVariables.js');
 
+const SilentAction = TestVariables.SilentAction;
+const RecordedAction = TestVariables.RecordedAction;
+
 const user = TestVariables.newUser;
 const req = TestVariables.reqSkeleton({
     body: {
@@ -13,67 +16,63 @@ module.exports = {
     getTestUser: () => user,
 
     executeActions: (variables, callback) =>
-        TestVariables.executeActions(variables, getActions(callback)),
+        TestVariables.executeActions(variables, getActions(callback), callback),
 
     createUser: createUser,
     loginUser: loginUser,
-    deleteUser: deleteUser
+    deleteUser: deleteUser,
+    loginJsonHandler: loginJsonHandler
 };
 
-function  getActions (finalCallback) {
+function getActions() {
     return [
-        createUser,
-        loginUserBadPassword,
-        loginUser,
-        getUser,
-        getUserBadToken,
-        changeUserName,
-        getUser,
-        deleteUser,
-        getUser,
-        finalCallback
+        new RecordedAction(createUser),
+        new RecordedAction(loginUserBadPassword),
+        new RecordedAction(loginUser, loginJsonHandler),
+        new RecordedAction(getUser),
+        new RecordedAction(getUserBadToken),
+        new RecordedAction(changeUserName),
+        new RecordedAction(getUser),
+        new RecordedAction(deleteUser),
+        new RecordedAction(getUser)
     ];
 }
 
-function createUser(variables, callback) {
-    UserController.createUser(req, TestVariables.resSkeleton(variables, callback));
+function createUser(response, callback) {
+    UserController.createUser(req, TestVariables.resSkeleton(response, callback));
 }
 
-function loginUserBadPassword(variables, callback) {
+function loginUserBadPassword(response, callback) {
     req.swagger.params.body.value.password = "notthepassword";
-    UserController.loginUser(req, TestVariables.resSkeleton(variables, callback));
+    UserController.loginUser(req, TestVariables.resSkeleton(response, callback));
 }
 
-function loginUser(variables, callback) {
+function loginUser(response, callback) {
     req.swagger.params.body.value.password = "password";
-    UserController.loginUser(req, TestVariables.resSkeleton(variables, () =>
-        saveJWT(variables, callback)
-    ));
+    UserController.loginUser(req, TestVariables.resSkeleton(response, callback));
 }
 
-function getUser(variables, callback) {
-    req.res = TestVariables.resSkeleton(variables, callback);
-    UserController.verifyJWT(req, null, "Bearer " + variables.JWT, () => UserController.getUser(req, req.res));
+function getUser(response, callback) {
+    req.res = TestVariables.resSkeleton(response, callback);
+    UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => UserController.getUser(req, req.res));
 }
 
-function getUserBadToken(variables, callback) {
-    req.res = TestVariables.resSkeleton(variables, callback);
+function getUserBadToken(response, callback) {
+    req.res = TestVariables.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + "zzaz", () => UserController.getUser(req, req.res));
 }
 
-function changeUserName(variables, callback) {
+function changeUserName(response, callback) {
     req.swagger.params.body.value.name.firstNames = "Jake";
-    req.res = TestVariables.resSkeleton(variables, callback);
-    UserController.verifyJWT(req, null, "Bearer " + variables.JWT, () => UserController.updateUser(req, req.res));
+    req.res = TestVariables.resSkeleton(response, callback);
+    UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => UserController.updateUser(req, req.res));
 }
 
-function deleteUser(variables, callback) {
-    req.res = TestVariables.resSkeleton(variables, callback);
-    UserController.verifyJWT(req, null, "Bearer " + variables.JWT, () => UserController.deleteUser(req, req.res));
+function deleteUser(response, callback) {
+    req.res = TestVariables.resSkeleton(response, callback);
+    UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => UserController.deleteUser(req, req.res));
 }
 
-function saveJWT(variables, callback) {
-    const json = variables.responseJSON;
-    variables.JWT = json[json.length - 1].token;
-    callback();
+function loginJsonHandler (json, variables)  {
+    variables.JWT = json.token;
 }
