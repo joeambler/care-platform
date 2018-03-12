@@ -1,12 +1,10 @@
 'use strict';
 
-const randomstring = require("randomstring");
-const app = require('../src/server.js');
+const app = require('../../src/server.js');
 
 module.exports = {
     executeActions: function executeActions(variables, actions, finalCallback) {
         variables.responses = variables.responses === undefined ? [] : variables.responses;
-        console.log(variables);
 
         const currentAction = actions[0];
         if (actions.length === 0) {
@@ -65,23 +63,7 @@ module.exports = {
         }
     },
 
-    newUser: {
-        name: {
-            title: "Dr",
-            firstNames: "Grace",
-            surnames: "Hopper"
-        },
-        email: randomstring.generate(50) + "@example.com",
-        password: "password"
-    },
 
-    newClient: {
-        name: {
-            title: "Mr",
-            firstNames: "Client",
-            surnames: "Client"
-        }
-    }
 };
 
 function Response(variables, jsonHandler) {

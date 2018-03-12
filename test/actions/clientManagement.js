@@ -1,14 +1,15 @@
 'use strict';
-const ClientController = require('../src/api/controllers/clients.js');
-const UserController = require('../src/api/controllers/users.js');
-const UserManagementActions = require('./userManagementActions');
-const TestVariables = require('./testVariables.js');
+const ClientController = require('../../src/api/controllers/clients.js');
+const UserController = require('../../src/api/controllers/users.js');
+const UserManagementActions = require('./userManagement');
+const TestVariables = require('../helpers/testVariables');
+const HelperFunctions = require('../helpers/helperFunctions.js');
 
-const SilentAction = TestVariables.SilentAction;
-const RecordedAction = TestVariables.RecordedAction;
+const SilentAction = HelperFunctions.SilentAction;
+const RecordedAction = HelperFunctions.RecordedAction;
 
 const client = TestVariables.newClient;
-let req = TestVariables.reqSkeleton({
+let req = HelperFunctions.reqSkeleton({
     body: {
         value: client
     }
@@ -18,7 +19,7 @@ module.exports = {
     getTestClient: () => client,
 
     executeActions: (variables, callback) =>
-        TestVariables.executeActions(variables, getActions(), callback),
+        HelperFunctions.executeActions(variables, getActions(), callback),
 
     createClient: createClient,
     saveClientIDJsonHandler: saveClientIDJsonHandler
@@ -37,7 +38,7 @@ function getActions() {
 }
 
 function createClient(response, callback) {
-    req.res = TestVariables.resSkeleton(response, callback);
+    req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => ClientController.postUsersClients(req, req.res));
 }
 
@@ -46,17 +47,17 @@ function saveClientIDJsonHandler (json, variables)  {
 }
 
 function getClient(response, callback) {
-    req = TestVariables.reqSkeleton({
+    req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         }
     });
-    req.res = TestVariables.resSkeleton(response, callback);
+    req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => ClientController.getClient(req, req.res));
 }
 
 function deleteClient(response, callback) {
-    req = TestVariables.reqSkeleton({
+    req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         },
@@ -64,6 +65,6 @@ function deleteClient(response, callback) {
             value: UserManagementActions.getTestUser()
         }
     });
-    req.res = TestVariables.resSkeleton(response, callback);
+    req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => ClientController.deleteClient(req, req.res));
 }

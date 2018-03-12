@@ -1,14 +1,14 @@
 'use strict';
 
-const TestVariables = require('./testVariables.js');
-const ClientManagementActions = require('./clientManagementActions.js');
+const HelperFunctions = require('./helpers/helperFunctions.js');
+const ClientManagementActions = require('./actions/clientManagement.js');
 
 module.exports = {
     setUp: function (callback) {
         ClientManagementActions.executeActions(this, callback);
     },
     tearDown: function (callback) {
-        TestVariables.printResponses(this.responses);
+        HelperFunctions.printResponses(this.responses);
         callback();
     },
     clientTests: function (test) {
