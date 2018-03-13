@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Express HTML</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <script>
+        const host = "care.ambler.me";
+        const credentials = {
+            email: "oscarbailey1@gmail.com",
+            password: "wjvaWRvKHZlgUqtj3jrQ"
+        };
+        let jwt;
+        let savedClientID;
+        let savedComponentID;
+
+        login(getClients);
+
+        function login(callback) {
+            const xhttp = new XMLHttpRequest();
+
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4) {
+                    const res = JSON.parse(this.responseText);
+                    jwt = res.token;
+                    callback();
+                }
+            };
+            xhttp.open("POST", "http://" + host + "/v0/users/login", true);
+            xhttp.setRequestHeader("accept", "application/json");
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.send(JSON.stringify(credentials));
+
+
+        }
+
+        function getClients() {
+            const xhttp = new XMLHttpRequest();
+
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4) {
+                    const res = JSON.parse(this.responseText);
+                    res.forEach(c => {
+                        $("#clientDropdownItems").append(
+                            option(c.name.title + " " + c.name.firstNames + " " + c.name.surnames, c.id, "setClient"));
+                    });
+                    $("#clientDropdownLabel").text("Select Client");
+                }
+            };
+            xhttp.open("GET", "http://" + host + "/v0/users/me/clients", true);
+            xhttp.setRequestHeader("accept", "application/json");
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.setRequestHeader("X-API-Key", "Bearer " + jwt);
+            xhttp.send();
+        }
+
+        function setClient(clientID) {
+            $("#clientDropdown").fadeOut();
+            savedClientID = clientID;
+            getComponents();
+        }
+
+        function getComponents() {
+            const xhttp = new XMLHttpRequest();
+
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4) {
+                    const res = JSON.parse(this.responseText);
+                    res.forEach(c => {
+                        $("#componentDropdownItems").append(
+                            option(c.name, c.id, "setComponent"));
+                    });
+                    $("#componentDropdownLabel").text("Select Component");
+                    $("#componentDropdown").fadeIn();
+                }
+            };
+            xhttp.open("GET", "http://" + host + "/v0/clients/" + savedClientID + "/components", true);
+            xhttp.setRequestHeader("accept", "application/json");
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.setRequestHeader("X-API-Key", "Bearer " + jwt);
+
+            xhttp.send();
+
+        }
+
+        function setComponent(componentID) {
+            $("#componentDropdown").fadeOut();
+            savedComponentID = componentID;
+            getEvents();
+
+        }
+
+        function option(label, number, callback) {
+            return "<a class=\"dropdown-item\" onclick=\"" + callback + "(" + number + ")\">" + label + "</a>";
+        }
+
+        let mal = true;
+
+        function getEvents() {
+            const xhttp = new XMLHttpRequest();
+
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4) {
+                    if (this.status !== 200){
+                        $('#JWTExpired').fadeIn();
+                        setTimeout(function () {$('#JWTExpired').fadeOut();},5000);
+                        return login(getEvents);
+                    }
+                    $("#tablebody").empty();
+                    const res = JSON.parse(this.responseText);
+                    res.forEach(e => {
+                        //alert(JSON.stringify(e));
+                        $("#tablebody").append(tableEntry(e.date, e.type, e.details, JSON.parse(e.deviceInstance.properties)));
+                    });
+                    $("#eventsTable").fadeIn();
+                    setTimeout(getEvents, 3000);
+
+                }
+            };
+
+            xhttp.open("GET", "http://" + host + "/v0/clients/"+ savedClientID+"/components/"+ savedComponentID +"/events", true);
+            xhttp.setRequestHeader("accept", "application/json");
+            xhttp.setRequestHeader("Content-type", "application/json");
+            xhttp.setRequestHeader("X-API-Key", "Bearer " + jwt);
+
+            xhttp.send();
+
+        }
+
+        function tableEntry(date, type, details, deviceProperties) {
+            const datetime = new Date(date);
+            const formattedProperteies = formatProperties(deviceProperties)
+            return "<tr><th scope=\"row\">"+ datetime.toLocaleString('en-GB', { timeZone: 'UTC' })+ "</th><td>"+type+"</td><td>"+details+"</td><td>"+ formattedProperteies+ "</td></tr>"
+        }
+
+        function formatProperties(properties){
+            let str = "<pre>";
+            Object.keys(properties).forEach(function(key,index) {
+                str = str + "<b>" + key + ":\t</b>" + properties[key] + "\n";
+            });
+            return str + "</pre>"
+        }
+
+    </script>
+</head>
+<body>
+<div style="margin:100px;">
+    <div id="JWTExpired" class="alert alert-info" role="alert" style="display:none">
+        This is a info alert—check it out!
+    </div>
+    <h1>Care Platform Demonstration</h1>
+
+    <div id="clientDropdown" class="dropdown show">
+        <a id="clientDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
+           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Logging in...
+        </a>
+
+        <div id="clientDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        </div>
+    </div>
+
+    <div id="componentDropdown" class="dropdown show" style="display:none;">
+        <a id = "componentDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+           aria-expanded="false">
+           Getting Components...
+        </a>
+
+        <div id="componentDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        </div>
+    </div>
+
+    <table id="eventsTable" style="display: none" class="table">
+        <thead>
+        <tr>
+            <th scope="col">Time</th>
+            <th scope="col">Type</th>
+            <th scope="col">Details</th>
+            <th scope="col">Device Properties</th>
+        </tr>
+        </thead>
+        <tbody id="tablebody">
+
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

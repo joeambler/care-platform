@@ -4,6 +4,7 @@ const SwaggerExpress = require('swagger-express-mw');
 const app = require('express')();
 const userContoller = require('./api/controllers/users');
 const componentController = require('./api/controllers/components');
+const demoClient = require('./democlient/client')
 const url = require('url');
 const fs = require('fs');
 
@@ -37,6 +38,7 @@ app.use('/spec.yaml', (req, res) => {
         res.send(contents.replace('localhost:10010', baseURL));
     });
 });
+app.use('/democlient', demoClient.getUI);
 
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
@@ -85,6 +87,8 @@ function sendHomepage(res) {
         + "/api-docs"
         + ">Click here</a><h2>Demo Day Poster</h2><a href ="
         + "https://1drv.ms/b/s!AnSbDdYwkyYMnINQkx-f3yJ6VcsVQw"
+        + ">Click here</a><h2>Event Provider Demo</h2><a href ="
+        + "/democlient"
         + ">Click here</a><h2>OpenAPI Specification (JSON)</h2><a  href ="
         + "/spec.json"
         + " download>Click here</a></br>"
