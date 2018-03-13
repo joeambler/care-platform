@@ -119,7 +119,7 @@
                     }
                     $("#tablebody").empty();
                     const res = JSON.parse(this.responseText);
-                    res.forEach(e => {
+                    res.reverse().forEach(e => {
                         //alert(JSON.stringify(e));
                         $("#tablebody").append(tableEntry(e.date, e.type, e.details, JSON.parse(e.deviceInstance.properties)));
                     });
