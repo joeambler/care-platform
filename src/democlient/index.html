@@ -140,16 +140,16 @@
 
         function tableEntry(date, type, details, deviceProperties) {
             const datetime = new Date(date);
-            const formattedProperteies = formatProperties(deviceProperties)
+            const formattedProperteies = formatProperties(deviceProperties);
             return "<tr><th scope=\"row\">"+ datetime.toLocaleString('en-GB', { timeZone: 'UTC' })+ "</th><td>"+type+"</td><td>"+details+"</td><td>"+ formattedProperteies+ "</td></tr>"
         }
 
         function formatProperties(properties){
-            let str = "<pre>";
+            let str = "<pre><table>";
             Object.keys(properties).forEach(function(key,index) {
-                str = str + "<b>" + key + ":\t</b>" + properties[key] + "\n";
+                str = str + "<tr><td><b>" + key + ":</b></td><td> "+ properties[key] + "</td></tr>";
             });
-            return str + "</pre>"
+            return str + "</table></pre>"
         }
 
     </script>
