@@ -1005,7 +1005,7 @@ definitions:
     required:
     - email
     - admin
-    #component defintions
+    #component definitions
 
   NewComponent:
     title: Component to create

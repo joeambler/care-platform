@@ -55,12 +55,12 @@ function postUsersClients(req, res) {
 
     const serverError = (reason) => {
         console.log(reason);
-        req.res.status(500).json();
-        req.res.end();
+        res.status(500).json();
+        res.end();
     };
 
     const success = (client, name) => {
-        req.res.status(201).json({
+        res.status(201).json({
             id: client.id,
             name: {
                 title: name.title,
@@ -68,7 +68,7 @@ function postUsersClients(req, res) {
                 surnames: name.surnames
             }
         });
-        req.res.end();
+        res.end();
     };
 
     const createClient = name => {
@@ -128,6 +128,7 @@ function deleteUserClient(req, res) {
                 if (users.length < 2) {
                     client.destroy();
                 }
+                // noinspection Annotator
                 user.removeClient(client).then(() => {
                     req.res.status(200).json();
                     req.res.end();
@@ -239,7 +240,6 @@ function deleteClient(req, res) {
     const payload = () => {
         const clientId = req.swagger.params.clientID.value;
         const user = req.User;
-        const body = req.swagger.params.body.value;
 
         user.getClients().then((clients) => {
             let client = clients.find(e => {
@@ -250,7 +250,7 @@ function deleteClient(req, res) {
             if (!client.UserClient.admin) return unauthorizedError();
 
             client.setUsers([]).then(() => {
-                client.destroy().then(name => {
+                client.destroy().then(() => {
                     res.status(200).json();
                     res.end();
                 }, serverError);

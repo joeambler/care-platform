@@ -81,19 +81,21 @@ function getUser(req, res) {
         },
         attributes: ['email']
     }).then(user => {
-        if (user == null){
+        if (user == null) {
             return error("Null user");
         }
         res.status(200).json(user);
         res.end();
-    }, error );
+    }, error);
 }
 
 function updateUser(req, res) {
     const body = req.swagger.params.body.value;
     if (body.name) {
         for (let prop in body.name) {
-            req.User.name[prop] = body.name[prop];
+            if (body.name.hasOwnProperty(prop)) {
+                req.User.name[prop] = body.name[prop];
+            }
         }
     }
 
@@ -161,7 +163,7 @@ function deleteUser(req, res) {
                     }
                 }
                 //Delete left over password reset codes
-                destroyPromises.push(models.PasswordResetCode.destroy({where: { userId: user.id}}));
+                destroyPromises.push(models.PasswordResetCode.destroy({where: {userId: user.id}}));
 
                 //Delete user
                 Promise.all(destroyPromises).then(() => {
@@ -329,6 +331,7 @@ function usePasswordResetCode(req, res) {
             return notFoundErrorCallback();
         }
 
+        // noinspection Annotator
         models.PasswordResetCode.findOne({where: {userId: user.id}}).then(resetCode => {
             if (resetCode == null) {
                 return unauthorizedCallback();
@@ -341,6 +344,9 @@ function usePasswordResetCode(req, res) {
                     return;
                 }
 
+                // noinspection JSUndefinedPropertyAssignment
+                // noinspection JSUndefinedPropertyAssignment
+                // noinspection JSUndefinedPropertyAssignment
                 user.passwordHash = bcrypt.hashSync(newPassword, saltRounds);
 
                 models.sequelize.transaction((t) => {
@@ -399,7 +405,7 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
                         as: 'name'
                     }
                 }).then(user => {
-                    if (user == null){
+                    if (user == null) {
                         return unauthorizedCallback("User no longer exists");
                     }
                     req.User = user;
@@ -432,7 +438,7 @@ function sendEmail(senderAccount, emailAddress, code, successCallback, errorCall
         text: 'Use the following code to reset your password:\n' + code // plain text body
     };
 
-    transporter.sendMail(mailOptions, (err, info) => {
+    transporter.sendMail(mailOptions, (err) => {
         if (err) {
             errorCallback(err);
         } else {

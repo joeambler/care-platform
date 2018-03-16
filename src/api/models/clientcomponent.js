@@ -1,6 +1,7 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-    var ClientModule = sequelize.define('ClientComponent', {
+    // noinspection JSCheckFunctionSignatures
+    const ClientModule = sequelize.define('ClientComponent', {
         key: {
             type: DataTypes.STRING,
             unique: true,

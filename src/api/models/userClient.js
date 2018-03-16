@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-    var UserClient = sequelize.define('UserClient', {
+    return sequelize.define('UserClient', {
         admin: {
             type: DataTypes.BOOLEAN,
             defaultValue: false
@@ -10,6 +10,4 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: false
         }
     });
-
-    return UserClient;
 };

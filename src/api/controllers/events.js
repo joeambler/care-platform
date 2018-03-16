@@ -135,6 +135,8 @@ function postEvent(req, res) {
 }
 
 function saveNewEvent(component, deviceType, eventType, eventDetails, deviceProperties) {
+    // noinspection Annotator
+    // noinspection Annotator
     return models.sequelize.transaction(t =>
         models.Event.create({details: eventDetails, date: new Date()}, {transaction: t}).then(e => Promise.all([
             e.setEventType(eventType, {transaction: t}),
@@ -174,6 +176,8 @@ function getEventType(component, eventType) {
             ]
         }).then(p => {
             if (p.length > 0) {
+                // noinspection Annotator
+                // noinspection Annotator
                 fulfill(p[0].EventType);
             } else {
                 reject("The component does not have permission to use this event type.");

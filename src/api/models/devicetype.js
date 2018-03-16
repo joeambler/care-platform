@@ -1,14 +1,11 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var DeviceType = sequelize.define('DeviceType', {
-    type: DataTypes.STRING,
-    prototype: DataTypes.STRING
-  }, {
-    classMethods: {
-      associate: function(models) {
+    const DeviceType = sequelize.define('DeviceType', {
+        type: DataTypes.STRING,
+        prototype: DataTypes.STRING
+    });
+    DeviceType.associate = (models) => {
         // associations can be defined here
-      }
-    }
-  });
-  return DeviceType;
+    };
+    return DeviceType;
 };

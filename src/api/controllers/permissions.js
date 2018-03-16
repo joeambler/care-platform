@@ -205,6 +205,7 @@ function addPermissionsByType(t, type, permissions, model, component) {
                 promises.push(type === 'event' ? p.setEventType(instance, {transaction: t}) :
                     type === 'alert' ? p.setAlertType(instance, {transaction: t}) :
                         null);
+                // noinspection Annotator
                 promises.push(component.addPermission(p, {transaction: t}));
                 return Promise.all(promises);
             })

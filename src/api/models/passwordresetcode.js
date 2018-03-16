@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-    var PasswordResetCode = sequelize.define('PasswordResetCode', {
+    const PasswordResetCode = sequelize.define('PasswordResetCode', {
         resetCodeHash: DataTypes.STRING,
         expiryTime: DataTypes.DATE
     });

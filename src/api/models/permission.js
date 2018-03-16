@@ -1,7 +1,8 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-    var Permission = sequelize.define('Permission', {
+    // noinspection JSCheckFunctionSignatures
+    const Permission = sequelize.define('Permission', {
         type: DataTypes.ENUM('event', 'device', 'alert'),
         tentative: {
             type: DataTypes.BOOLEAN,

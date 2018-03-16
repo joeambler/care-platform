@@ -19,7 +19,7 @@ function newComponent(req, res) {
 
     const key = randomstring.generate(100);
 
-    const serverErrror = (err) => {
+    const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
         res.end();
@@ -49,16 +49,16 @@ function newComponent(req, res) {
                 componentData.client = client.id;
                 res.status(201).json(componentData);
                 res.end();
-            }, serverErrror);
-        }, serverErrror);
-    }, serverErrror);
+            }, serverError);
+        }, serverError);
+    }, serverError);
 }
 
 function getComponents(req, res) {
     const clientId = req.swagger.params.clientID.value;
     const user = req.User;
 
-    const serverErrror = (err) => {
+    const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
         res.end();
@@ -80,8 +80,8 @@ function getComponents(req, res) {
                 });
                 res.status(200).json(componentObjects);
                 res.end();
-            }, serverErrror);
-        }, serverErrror);
+            }, serverError);
+        }, serverError);
 }
 
 function getComponentById(req, res) {
@@ -89,7 +89,7 @@ function getComponentById(req, res) {
     const componentID = req.swagger.params.componentID.value;
     const user = req.User;
 
-    const serverErrror = (err) => {
+    const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
         res.end();
@@ -100,6 +100,7 @@ function getComponentById(req, res) {
         res.end();
     };
 
+    // noinspection Annotator
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
         .then(clients => {
             if (clients.length < 1) return notFoundError();
@@ -110,8 +111,8 @@ function getComponentById(req, res) {
                     }
                     res.status(200).json(components[0].get({plain: true}));
                     res.end();
-                }, serverErrror);
-        }, serverErrror);
+                }, serverError);
+        }, serverError);
 }
 
 function deleteComponentById(req, res) {
@@ -119,7 +120,7 @@ function deleteComponentById(req, res) {
     const componentID = req.swagger.params.componentID.value;
     const user = req.User;
 
-    const serverErrror = (err) => {
+    const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
         res.end();
@@ -141,8 +142,8 @@ function deleteComponentById(req, res) {
                     components[0].destroy();
                     res.status(200).json();
                     res.end();
-                }, serverErrror);
-        }, serverErrror);
+                }, serverError);
+        }, serverError);
 }
 
 function authenticateComponent(req, authOrSecDef, scopesOrApiKey, callback) {

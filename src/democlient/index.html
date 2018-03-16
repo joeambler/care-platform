@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--suppress BadExpressionStatementJS, BadExpressionStatementJS -->
 <html>
 <head>
     <title>Demo Client</title>
@@ -43,8 +44,6 @@
             xhttp.setRequestHeader("accept", "application/json");
             xhttp.setRequestHeader("Content-type", "application/json");
             xhttp.send(JSON.stringify(credentials));
-
-
         }
 
         function getClients() {
@@ -145,11 +144,11 @@
         }
 
         function formatProperties(properties){
-            let str = "<pre><table>";
-            Object.keys(properties).forEach(function(key,index) {
+            let str = "<table>";
+            Object.keys(properties).forEach(function(key) {
                 str = str + "<tr><td><b>" + key + ":</b></td><td> "+ properties[key] + "</td></tr>";
             });
-            return str + "</table></pre>"
+            return str + "</table>"
         }
 
         function login () {

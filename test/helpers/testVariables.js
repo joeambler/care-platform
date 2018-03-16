@@ -1,5 +1,5 @@
 'use strict';
-const randomstring = require("randomstring");
+const randomString = require("randomstring");
 
 module.exports = {
     newUser: {
@@ -8,7 +8,7 @@ module.exports = {
             firstNames: "Grace",
             surnames: "Hopper"
         },
-        email: randomstring.generate(50) + "@example.com",
+        email: randomString.generate(50) + "@example.com",
         password: "password"
     },
 

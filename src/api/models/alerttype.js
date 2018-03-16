@@ -1,13 +1,10 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  var AlertType = sequelize.define('AlertType', {
-    type: DataTypes.STRING
-  }, {
-    classMethods: {
-      associate: function(models) {
+    const AlertType = sequelize.define('AlertType', {
+        type: DataTypes.STRING
+    });
+    AlertType.associate = (models) => {
         // associations can be defined here
-      }
-    }
-  });
-  return AlertType;
+    };
+    return AlertType;
 };
