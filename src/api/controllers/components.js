@@ -22,13 +22,11 @@ function newComponent(req, res) {
     const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = () => {
         console.log("Client not found");
         res.status(404).json();
-        res.end();
     };
 
     const componentData = {
@@ -48,7 +46,6 @@ function newComponent(req, res) {
                 componentData.id = component.id;
                 componentData.client = client.id;
                 res.status(201).json(componentData);
-                res.end();
             }, serverError);
         }, serverError);
     }, serverError);
@@ -61,13 +58,11 @@ function getComponents(req, res) {
     const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = () => {
         console.log("Client not found");
         res.status(404).json();
-        res.end();
     };
 
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
@@ -79,7 +74,6 @@ function getComponents(req, res) {
                     componentObjects.push(m.get({plain: true}));
                 });
                 res.status(200).json(componentObjects);
-                res.end();
             }, serverError);
         }, serverError);
 }
@@ -92,12 +86,10 @@ function getComponentById(req, res) {
     const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = () => {
         res.status(404).json();
-        res.end();
     };
 
     // noinspection Annotator
@@ -110,7 +102,6 @@ function getComponentById(req, res) {
                         return notFoundError()
                     }
                     res.status(200).json(components[0].get({plain: true}));
-                    res.end();
                 }, serverError);
         }, serverError);
 }
@@ -123,12 +114,10 @@ function deleteComponentById(req, res) {
     const serverError = (err) => {
         console.log("Cannot add: " + err);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = () => {
         res.status(404).json();
-        res.end();
     };
 
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
@@ -141,7 +130,6 @@ function deleteComponentById(req, res) {
                     }
                     components[0].destroy();
                     res.status(200).json();
-                    res.end();
                 }, serverError);
         }, serverError);
 }
@@ -150,7 +138,6 @@ function authenticateComponent(req, authOrSecDef, scopesOrApiKey, callback) {
     const unauthorizedCallback = (reason) => {
         console.log(reason);
         req.res.status(401).json();
-        req.res.end();
     };
 
     if (!scopesOrApiKey) {

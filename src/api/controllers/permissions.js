@@ -17,18 +17,15 @@ function requestPermissions(req, res) {
     const serverError = (error) => {
         console.log(error);
         res.status(500).json();
-        res.end();
     };
 
     const success = () => {
         res.status(200).json();
-        res.end();
     };
 
     const devicesError = (deviceDefinitions) => {
         console.log(deviceDefinitions);
         res.status(400).json(deviceDefinitions);
-        res.end();
     };
 
     const deviceDefinitions = body.deviceDefinitions;
@@ -231,12 +228,10 @@ function getComponentPermissionsREST(req, res, tentative) {
     const serverError = (err) => {
         console.log("Cannot get: " + err);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = () => {
         res.status(404).json();
-        res.end();
     };
 
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).then(clients => {
@@ -250,7 +245,6 @@ function getComponentPermissionsREST(req, res, tentative) {
 
             getComponentPermissionsFlat(components[0], tentative, false).then(permissions => {
                 res.status(200).json(permissions);
-                res.end();
             }, serverError);
         }, serverError);
     }, serverError);
@@ -273,12 +267,10 @@ function changePermissionStatusREST(req, res, setTentative) {
     const serverError = (err) => {
         console.log("Cannot get: " + err);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = () => {
         res.status(404).json();
-        res.end();
     };
 
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).then(clients => {
@@ -305,7 +297,6 @@ function changePermissionStatusREST(req, res, setTentative) {
 
                 if (nonExistentPermissions.length > 0){
                     res.status(400).json(nonExistentPermissions);
-                    res.end();
                     return;
                 }
 
@@ -317,7 +308,6 @@ function changePermissionStatusREST(req, res, setTentative) {
 
                 Promise.all(promises).then(() => {
                     res.status(200).json();
-                    res.end();
                 }, serverError);
             }, serverError);
         }, serverError);

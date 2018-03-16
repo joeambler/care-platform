@@ -27,12 +27,10 @@ function getEvents(res, user, clientId, limitComponent, componentID) {
     const serverError = (err) => {
         console.log("Cannot get: " + err);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = () => {
         res.status(404).json();
-        res.end();
     };
 
     user.getClients({where: {id: clientId}}).then(clients => {
@@ -57,7 +55,6 @@ function getEvents(res, user, clientId, limitComponent, componentID) {
                 jsonOutput.forEach(o => jsonOutputFlat = jsonOutputFlat.concat(o));
 
                 res.status(200).json(jsonOutputFlat);
-                res.end();
             }, serverError)
 
 
@@ -106,18 +103,15 @@ function postEvent(req, res) {
     const serverError = (error) => {
         console.log(error);
         res.status(500).json();
-        res.end();
     };
 
     const notAuthorizedError = (reason) => {
         console.log(reason);
         res.status(401).json();
-        res.end();
     };
 
     const success = () => {
         res.status(200).json();
-        res.end();
     };
 
     Promise.all([deviceType, eventType])

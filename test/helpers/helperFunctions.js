@@ -55,10 +55,10 @@ module.exports = {
                 return {
                     json: (json) => {
                         response.setJson(json);
+                        callback();
                     }
                 };
-            },
-            end: callback
+            }
         }
     },
 

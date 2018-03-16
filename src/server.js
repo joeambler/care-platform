@@ -44,7 +44,7 @@ app.use('/democlient', (req, res) =>  demoClient.getUI(res));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.use('/', (req, res) => sendHomepage(res));
+app.get('/', (req, res) => sendHomepage(res));
 //END DOCS
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {

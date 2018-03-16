@@ -25,13 +25,11 @@ function createUser(req, res) {
 
     if (!emailValidator.validate(body.email)) {
         res.status(406).json("Invalid email address");
-        res.end();
         return;
     }
 
     if (body.password.length < 8) {
         res.status(406).json("Password must be 8 characters or longer.");
-        res.end();
         return;
     }
 
@@ -50,16 +48,13 @@ function createUser(req, res) {
             nameId: name.id
         }).then(() => {
             res.status(201).json();
-            res.end();
         }, (reason) => {
             console.log("User insert error: " + reason);
             res.status(406).json("User already exists.");
-            res.end();
         });
     }, (reason) => {
         console.log("Name or Password Error: " + reason);
         res.status(406).json("Name or password error.");
-        res.end();
     });
 }
 
@@ -67,7 +62,6 @@ function getUser(req, res) {
     const error = (reason) => {
         console.log("User could not be found, may have been deleted. Therefore expired token." + reason);
         res.status(401).json();
-        res.end();
     };
 
     models.User.findOne({
@@ -85,7 +79,6 @@ function getUser(req, res) {
             return error("Null user");
         }
         res.status(200).json(user);
-        res.end();
     }, error);
 }
 
@@ -103,7 +96,6 @@ function updateUser(req, res) {
         if (!emailValidator.validate(body.email)) {
             console.log("Invalid email address");
             res.status(406).json("Invalid email address. No changes made.");
-            res.end();
             return;
         }
         req.User.email = body.email;
@@ -112,7 +104,6 @@ function updateUser(req, res) {
     if (body.password) {
         if (body.password.length < 8) {
             res.status(406).json("Password must be 8 characters or longer. No changes made.");
-            res.end();
             return;
         }
         req.User.passwordHash = bcrypt.hashSync(body.password, saltRounds);
@@ -124,11 +115,9 @@ function updateUser(req, res) {
         });
     }).then(function () {
         res.status(200).json();
-        res.end();
     }).catch(function (err) {
         console.log("Cannot update: " + err);
         res.status(500).json();
-        res.end();
     });
 
 }
@@ -142,13 +131,11 @@ function deleteUser(req, res) {
     const serverError = (reason) => {
         console.log("Cannot delete: " + reason);
         res.status(500).json();
-        res.end();
     };
 
     if (req.User.email !== userEmail) {
         console.log("You can only delete your own user account");
         res.status(406).json();
-        res.end();
         return
     }
 
@@ -169,7 +156,6 @@ function deleteUser(req, res) {
                 Promise.all(destroyPromises).then(() => {
                     user.destroy().then(() => {
                         res.status(200).json();
-                        res.end();
                     }, serverError);
                 }, serverError);
             }, serverError);
@@ -179,12 +165,10 @@ function deleteUser(req, res) {
     const invalid = () => {
         console.log("Invalid password supplied");
         res.status(406).json();
-        res.end();
     };
 
     const error = () => {
         res.status(404).json();
-        res.end();
     };
 
     validCredentials(userEmail, userPassword, valid, invalid, error);
@@ -204,18 +188,15 @@ function loginUser(req, res) {
             expiresIn: 3 * 60 * 60 //3 Hours
         });
         res.status(200).json({token: token});
-        res.end();
     };
 
     const invalid = () => {
         console.log("Invalid password supplied");
         res.status(401).json();
-        res.end();
     };
 
     const error = () => {
         res.status(404).json();
-        res.end();
     };
 
     validCredentials(userEmail, userPassword, valid, invalid, error);
@@ -253,19 +234,16 @@ function sendPasswordResetEmail(req, res) {
     const serverErrorCallback = (reason) => {
         console.log("Server Error: " + reason);
         res.status(500).json(reason);
-        res.end();
     };
 
     const notFoundErrorCallback = (reason) => {
         console.log("Server Error: " + reason);
         res.status(404).json(reason);
-        res.end();
     };
 
     const successCallback = () => {
         console.log("Email sent");
         res.status(200).json();
-        res.end();
     };
 
     models.User.findOne({where: {email: userEmail}}).then(user => {
@@ -305,25 +283,21 @@ function usePasswordResetCode(req, res) {
     const serverErrorCallback = (reason) => {
         console.log("Server Error: " + reason);
         res.status(500).json(reason);
-        res.end();
     };
 
     const notFoundErrorCallback = (reason) => {
         console.log("Server Error: " + reason);
         res.status(404).json(reason);
-        res.end();
     };
 
     const successCallback = () => {
         console.log("Password Reset");
         res.status(200).json();
-        res.end();
     };
 
     const unauthorizedCallback = () => {
         console.log("Invalid or expired code");
         res.status(401).json();
-        res.end();
     };
 
     models.User.findOne({where: {email: userEmail}}).then(user => {
@@ -340,7 +314,6 @@ function usePasswordResetCode(req, res) {
             if (Date.now() < resetCode.expiryTime && bcrypt.compareSync(code, resetCode.resetCodeHash)) {
                 if (newPassword.length < 8) {
                     res.status(406).json("Password must be 8 characters or longer. No changes made.");
-                    res.end();
                     return;
                 }
 
@@ -367,7 +340,6 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
     const unauthorizedCallback = (reason) => {
         console.log(reason);
         req.res.status(401).json();
-        req.res.end();
     };
 
     if (!scopesOrApiKey) {
@@ -416,7 +388,6 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
         });
     } else {
         req.res.status(401).json();
-        req.res.end();
     }
 }
 

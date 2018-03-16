@@ -28,7 +28,6 @@ function fetchUsersClients(req, res, tentative){
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
-        res.end();
     };
 
     req.User.getClients({through: { where: { tentative: tentative}}, include: [{model: models.Name, as: "name"}]}).then(clients => {
@@ -44,7 +43,6 @@ function fetchUsersClients(req, res, tentative){
                 };
             }
             res.status(200).json(jsonclients);
-            res.end();
     }, serverError);
 }
 
@@ -56,7 +54,6 @@ function postUsersClients(req, res) {
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
-        res.end();
     };
 
     const success = (client, name) => {
@@ -68,7 +65,6 @@ function postUsersClients(req, res) {
                 surnames: name.surnames
             }
         });
-        res.end();
     };
 
     const createClient = name => {
@@ -104,13 +100,11 @@ function deleteUserClient(req, res) {
     const notFoundError = (reason) => {
         console.log(reason);
         res.status(404).json();
-        res.end();
     };
 
     const unauthorizedError = () => {
         console.log("Invalid password supplied");
         res.status(401).json();
-        res.end();
     };
 
 
@@ -131,7 +125,6 @@ function deleteUserClient(req, res) {
                 // noinspection Annotator
                 user.removeClient(client).then(() => {
                     req.res.status(200).json();
-                    req.res.end();
                 }, notFoundError);
             }, notFoundError);
         }, notFoundError);
@@ -148,13 +141,11 @@ function getClient(req, res) {
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = (reason) => {
         console.log(reason);
         res.status(404).json();
-        res.end();
     };
 
     user.getClients().then((clients) => {
@@ -171,7 +162,6 @@ function getClient(req, res) {
                     surnames: name.surnames
                 }
             });
-            res.end();
         }, serverError);
     }, notFoundError);
 
@@ -185,19 +175,16 @@ function updateClient(req, res) {
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = (reason) => {
         console.log(reason);
         res.status(404).json();
-        res.end();
     };
 
 
     const notAuthorizedError = () => {
         res.status(401).json();
-        res.end();
     };
 
     user.getClients().then((clients) => {
@@ -213,7 +200,6 @@ function updateClient(req, res) {
             name.title = body.name.title;
             name.save().then(() => {
                 res.status(200).json();
-                res.end();
             }, serverError)
         }, serverError);
     }, notFoundError);
@@ -223,18 +209,15 @@ function deleteClient(req, res) {
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = (reason) => {
         console.log(reason);
         res.status(404).json();
-        res.end();
     };
 
     const unauthorizedError = () => {
         res.status(401).json();
-        res.end();
     };
 
     const payload = () => {
@@ -252,7 +235,6 @@ function deleteClient(req, res) {
             client.setUsers([]).then(() => {
                 client.destroy().then(() => {
                     res.status(200).json();
-                    res.end();
                 }, serverError);
             }, serverError);
         }, notFoundError);
@@ -266,18 +248,15 @@ function shareClient(req, res) {
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = (reason) => {
         console.log(reason);
         res.status(404).json();
-        res.end();
     };
 
     const unauthorizedError = () => {
         res.status(401).json();
-        res.end();
     };
 
     const body = req.swagger.params.body.value;
@@ -300,7 +279,6 @@ function shareClient(req, res) {
 
             userToShareWith.addClient(client, {through: {tentative: true, admin: admin}}).then(() => {
                     res.status(200).json();
-                    res.end();
                 }, serverError);
         }, notFoundError);
     }, notFoundError);
@@ -310,13 +288,11 @@ function acceptClient(req, res) {
     const serverError = (reason) => {
         console.log(reason);
         res.status(500).json();
-        res.end();
     };
 
     const notFoundError = (reason) => {
         console.log(reason);
         res.status(404).json();
-        res.end();
     };
 
     const clientId = req.swagger.params.clientID.value;
@@ -331,9 +307,6 @@ function acceptClient(req, res) {
         if (!client.UserClient.tentative) return notFoundError("Client is already confirmed");
 
         client.UserClient.tentative = false;
-        client.UserClient.save().then(() => {
-            res.status(200).json();
-            res.end();
-        }, serverError);
+        client.UserClient.save().then(() => res.status(200).json(), serverError);
     }, notFoundError);
 }
