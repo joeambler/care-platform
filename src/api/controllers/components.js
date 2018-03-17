@@ -96,7 +96,7 @@ function getComponentById(req, res) {
     user.getClients({where: {id: clientId}, through: {where: {admin: true}}})
         .then(clients => {
             if (clients.length < 1) return notFoundError();
-            clients[0].getComponents({attributes: ['id', 'name', 'apiEndPoint', 'key'], where: {id: componentID}})
+            clients[0].getComponents({attributes: ['id', 'name', 'apiEndPoint', 'key', 'type'], where: {id: componentID}})
                 .then(components => {
                     if (components.length < 1) {
                         return notFoundError()

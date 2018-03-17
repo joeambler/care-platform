@@ -14,6 +14,8 @@ function requestPermissions(req, res) {
     const component = req.Component;
     const body = req.swagger.params.body.value;
 
+    console.log(body);
+
     const serverError = (error) => {
         console.log(error);
         res.status(500).json();
@@ -50,7 +52,6 @@ function requestPermissions(req, res) {
         const newPermissions = permissions.filter(p =>
             existingPermissions.filter(ep =>
                 ep.type === p.type && ep.name === p.name).length === 0
-
         );
 
         if (newPermissions.length < 1) return success();
@@ -145,10 +146,10 @@ function getDefinitionConflicts(deviceDefinitions) {
         Promise.all(devicesInDb).then((devices) => {
             for (let i = 0; i < devices.length; i++) {
                 if (devices[i] == null) {
-                    comparison.devicesToCreate.push(deviceDefinitions[i]);
+                    comparison.devicesToCreate.push(JSON.stringify(JSON.parse(deviceDefinitions[i])));
                     continue;
                 }
-                if (devices[i].prototype !== deviceDefinitions[i].prototype) {
+                if (JSON.stringify(JSON.parse(devices[i].prototype)) !== JSON.stringify(JSON.parse(deviceDefinitions[i].prototype))) {
                     comparison.conflictDeviceDefinitions.push(deviceDefinitions[i]);
                     continue;
                 }

@@ -1,6 +1,23 @@
 'use strict';
 const randomString = require("randomstring");
 
+const pillBoxDevicePermission = {
+    type: "device",
+    name: "Pill Box"
+};
+
+const pillBoxEventPermission = {
+    type: "event",
+    name: "Opened"
+};
+
+const pillBoxDeviceDefinition = {
+    type: "Pill Box",
+    prototype: JSON.stringify({
+        location: "string"
+    })
+};
+
 module.exports = {
     newUser: {
         name: {
@@ -21,8 +38,35 @@ module.exports = {
     },
 
     newEventComponent: {
-            type: "event",
-            name: "Pill Box"
-    }
+        type: "event",
+        name: "Pill Box"
+    },
+
+    newEvent: {
+        type: "Opened",
+        details: "The pill box was opened",
+        deviceInstance: {
+            type: "Pill Box",
+            properties: JSON.stringify({
+                location: "Kitchen"
+            })
+        }
+    },
+
+    pillBoxPermissions: {
+        permissions: [
+            pillBoxDevicePermission,
+            pillBoxEventPermission
+        ],
+        deviceDefinitions: [
+            pillBoxDeviceDefinition
+        ]
+    },
+
+    permissionsRequested: [
+        pillBoxDevicePermission,
+        pillBoxEventPermission
+    ]
 
 };
+
