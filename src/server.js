@@ -28,6 +28,7 @@ const specPath = __dirname + '/api/swagger/swagger.yaml';
 // noinspection NpmUsedModulesInstalled
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
+const pug = require("pug");
 const swaggerDocument = YAML.load(specPath);
 
 swaggerDocument.host = baseURL;
@@ -41,10 +42,9 @@ app.use('/spec.yaml', (req, res) => {
 });
 app.use('/democlient', (req, res) =>  demoClient.getUI(res));
 
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.get('/', (req, res) => sendHomepage(res));
+app.get('/', (req, res) => res.send(pug.renderFile('./src/views/index.pug', {url: activeProtocol +baseURL})));
 //END DOCS
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {
@@ -77,29 +77,6 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
     }
 
 });
-const activeProtocol = "http://";
-console.log('View Docs at:\t\t' + url.resolve(activeProtocol + baseURL, "/api-docs"));
-console.log('Download Spec (JSON):\t' + url.resolve(activeProtocol + baseURL, "/spec.json"));
-console.log('Download Spec (YAML):\t' + url.resolve(activeProtocol + baseURL, "/spec.yaml"));
-console.log('API endpoint:\t\t' + url.resolve(activeProtocol +baseURL,"/v0"));
 
-function sendHomepage(res) {
-    res.send("<h1>Care Platform</h1><h2>View Documentation</h2><a href ="
-        + "/api-docs"
-        + ">Click here</a><h2>Demo Day Poster</h2><a href ="
-        + "https://1drv.ms/b/s!AnSbDdYwkyYMnINQkx-f3yJ6VcsVQw"
-        + ">Click here</a><h2>Event Provider Demo</h2><a href ="
-        + "/democlient"
-        + ">Click here</a><h2>OpenAPI Specification (JSON)</h2><a  href ="
-        + "/spec.json"
-        + " download>Click here</a></br>"
-        + url.resolve(activeProtocol +baseURL,"/spec.json")
-        + "<h2>OpenAPI Specification (YAML) </h2><a href ="
-        + "/spec.yaml"
-        + " download>Click here</a></br>"
-        + url.resolve(activeProtocol +baseURL,"/spec.yaml")
-        + "<h2>Swagger Editor - Generate SDK using the downloaded specification </h2><a href ="
-        + "http://editor.swagger.io"
-        + ">Click here</a><h2>API Endpoint </h2>"
-        + url.resolve(activeProtocol +baseURL,"/v0"))
-}
+const activeProtocol = "http://";
+console.log(activeProtocol + baseURL);

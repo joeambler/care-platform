@@ -1,0 +1,54 @@
+doctype html
+html(lang='en')
+    head
+        meta(charset='utf-8')
+        meta(content='width=device-width, initial-scale=1, shrink-to-fit=no', name='viewport')
+        meta(content='', name='description')
+        meta(content='', name='author')
+        title Care Platform
+        link(href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css', rel='stylesheet')
+        style(type='text/css').
+            /* Move down content because we have a fixed navbar that is 3.5rem tall */
+            body {
+                padding-top: 3.5rem;
+            }
+    body
+        // Title Bar
+        nav.navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark
+            a.navbar-brand(href='../index.html') Care Platform
+        main(role='main')
+            // Welcome Text
+            .jumbotron
+                .container
+                    h1.display-3 Care Platform
+                    p View the Care Platform's documentation, specification and other items here.
+            .container
+                h2 API Endpoint
+                p !{url}/v0
+                .row
+                    .col-md-6.action(style='')
+                        h3 View Documentation
+                        p
+                            a.btn.btn-primary(href='/api-docs', role='button') View with SwaggerUI »
+                    .col-md-6.action(style='')
+                        h3 Demo Day Poster
+                        p
+                            a.btn.btn-primary(href='https://1drv.ms/b/s!AnSbDdYwkyYMnINQkx-f3yJ6VcsVQw', role='button') View on OneDrive »
+                .row
+                    .col-md-6.action(style='')
+                        h3 Event Provider Demo
+                        p
+                            a.btn.btn-primary(href='/democlient', role='button') Go to Demo »
+                    .col-md-6.action(style='')
+                        h3 OpenAPI Specification
+                        p JSON
+                        p
+                            a.btn.btn-primary(href='/spec.json', role='button', download='') Download JSON »
+                        p !{url}/spec.json
+                        p YAML
+                        p
+                            a.btn.btn-primary(href='/spec.yaml', role='button', download='') Download YAML »
+                        p !{url}/spec.json
+
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js', integrity='sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q', crossorigin='anonymous')
+        script(src='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js', integrity='sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin='anonymous')
