@@ -41,6 +41,8 @@ function getActions() {
         new RecordedAction(getRequestedPermissions),
         new RecordedAction(acceptPermissions),
         new RecordedAction(postEvent),
+        new RecordedAction(revokePermissions),
+        new RecordedAction(postEvent),
         new RecordedAction(deleteComponent),
         new SilentAction(ClientManagementActions.deleteClient),
         new SilentAction(UserManagementActions.deleteUser)
@@ -148,4 +150,20 @@ function acceptPermissions(response, callback) {
     });
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => PermissionsController.acceptPermissions(req, req.res));
+}
+
+function revokePermissions(response, callback) {
+    const req = HelperFunctions.reqSkeleton({
+        clientID: {
+            value: response.variables.clientID
+        },
+        componentID: {
+            value: response.variables.componentID
+        },
+        body: {
+            value: permissionsRequested
+        }
+    });
+    req.res = HelperFunctions.resSkeleton(response, callback);
+    UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => PermissionsController.revokePermissions(req, req.res));
 }

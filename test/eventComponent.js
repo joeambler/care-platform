@@ -34,7 +34,9 @@ module.exports = {
         test.ok(match, "Permissions requested should match");
         test.equals(this.responses[7].status, 200, "Should be able to accept requested permissions");
         test.equals(this.responses[8].status, 200, "Event should now be posted successfully");
-        test.equals(this.responses[9].status, 200, "Component should be deleted successfully");
+        test.equals(this.responses[9].status, 200, "Should be able to revoke accepted permissions");
+        test.equals(this.responses[10].status, 401, "Posting an event should now return unauthorized");
+        test.equals(this.responses[11].status, 200, "Component should be deleted successfully");
         test.done();
     }
 };

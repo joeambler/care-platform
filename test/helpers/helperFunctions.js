@@ -3,7 +3,7 @@
 const app = require('../../src/server.js');
 
 module.exports = {
-    executeActions: function executeActions(variables, actions, finalCallback) {
+    executeActions: function executeActions(variables, actions, finalCallback,i=0) {
         variables.responses = variables.responses === undefined ? [] : variables.responses;
 
         const currentAction = actions[0];
@@ -13,9 +13,10 @@ module.exports = {
             actions.shift();
             const response = new Response(variables, currentAction.jsonHandler);
             if (currentAction.record) {
-                variables.responses.push(response)
+                console.log("Executing recorded action: " + i++);
+                variables.responses.push(response);
             }
-            currentAction.action(response, () => executeActions(variables, actions, finalCallback));
+            currentAction.action(response, () => executeActions(variables, actions, finalCallback, i));
         }
     },
 

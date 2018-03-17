@@ -117,11 +117,10 @@ function postEvent(req, res) {
     Promise.all([deviceType, eventType])
         .then(([deviceType, eventType]) =>
             saveNewEvent(component, deviceType, eventType, eventDetails, deviceProperties)
-                .then((vs) =>
-                    success(forwardEvent(vs[0])
+                .then((e) =>
+                    forwardEvent(e[0])
                         .then(success)
                         .catch(serverError)
-                    )
                 )
                 .catch(serverError)
         )

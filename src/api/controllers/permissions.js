@@ -139,14 +139,14 @@ function getDefinitionConflicts(deviceDefinitions) {
         const comparison = new DevicesComparison();
         if (typeof deviceDefinitions === 'undefined') return fulfill(comparison);
 
-
         const devicesInDb = [];
         deviceDefinitions.forEach(d => devicesInDb.push(models.DeviceType.findOne({where: {type: d.type}})));
 
         Promise.all(devicesInDb).then((devices) => {
             for (let i = 0; i < devices.length; i++) {
                 if (devices[i] == null) {
-                    comparison.devicesToCreate.push(JSON.stringify(JSON.parse(deviceDefinitions[i])));
+                    deviceDefinitions[i].prototype = JSON.stringify(JSON.parse(deviceDefinitions[i].prototype));
+                    comparison.devicesToCreate.push(deviceDefinitions[i]);
                     continue;
                 }
                 if (JSON.stringify(JSON.parse(devices[i].prototype)) !== JSON.stringify(JSON.parse(deviceDefinitions[i].prototype))) {
