@@ -9,8 +9,10 @@ const pug = require("pug");
 const fs = require('fs');
 const YAML = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
+const bodyParser = require('body-parser')
 
 module.exports = app; // for testing
+app.use(bodyParser.json());
 
 const config = {
   appRoot: __dirname, // required config
@@ -25,23 +27,16 @@ const baseURL = process.env.NODE_ENV === 'production'?
     : 'localhost:10010';
 
 const specPath = __dirname + '/api/swagger/swagger.yaml';
+const serviceSpecPath = __dirname + '/serviceComponent/swagger/swagger.yaml';
 
 //DOCS
-serveUI(specPath, baseURL, '/api-docs');
+serveUI(specPath, baseURL, '');
+serveUI(serviceSpecPath, baseURL, '/serviceComponent');
 //END DOCS
 
-app.use('/spec.json', (req, res) => res.json(swaggerDocument));
-app.use('/spec.yaml', (req, res) => {
-    fs.readFile(specPath, 'utf8', function(err, contents) {
-        res.type('text/plain');
-        res.send(contents.replace('localhost:10010', baseURL));
-    });
-});
 app.use('/democlient', (req, res) =>  demoClient.getUI(res));
 
-
 app.get('/', (req, res) => res.send(pug.renderFile('./src/views/index.pug', {url: activeProtocol +baseURL})));
-
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {
     if (err) {
@@ -74,12 +69,22 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
 
 });
 
+app.post('/serviceComponent/v0/events', (req, res) => require('./serviceComponent/echo').postEvent(req, res));
+
 const activeProtocol = "http://";
 console.log(activeProtocol + baseURL);
 
 
-function serveUI(yamlDocumentPath, baseURL, url){
+function serveUI(specPath, baseURL, url){
     const swaggerDocument = YAML.load(specPath);
     swaggerDocument.host = baseURL;
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    app.use(url + "/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+    app.use(url + '/spec.json', (req, res) => res.json(swaggerDocument));
+    app.use(url + '/spec.yaml', (req, res) => {
+        fs.readFile(specPath, 'utf8', function(err, contents) {
+            res.type('text/plain');
+            res.send(contents.replace('localhost:10010', baseURL));
+        });
+    });
 }

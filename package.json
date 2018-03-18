@@ -31,6 +31,7 @@
   },
   "dependencies": {
     "bcrypt": "^1.0.3",
+    "body-parser": "^1.18.2",
     "email-validator": "latest",
     "express": "^4.12.3",
     "fs-extra": "^5.0.0",
