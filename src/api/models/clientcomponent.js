@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         ClientModule.hasMany(models.Permission);
         ClientModule.belongsTo(models.Client);
         ClientModule.hasMany(models.Event, {foreignKey : 'componentId'});
+        ClientModule.hasMany(models.Alert, {foreignKey : 'componentId'});
     };
     return ClientModule;
 };

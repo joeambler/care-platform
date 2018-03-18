@@ -50,7 +50,6 @@ function getEvents(res, user, clientId, limitComponent, componentID) {
             });
 
             Promise.all(jsonOutputPromises).then(jsonOutput => {
-                console.log(jsonOutput);
                 let jsonOutputFlat = [];
                 jsonOutput.forEach(o => jsonOutputFlat = jsonOutputFlat.concat(o));
 
@@ -113,6 +112,8 @@ function postEvent(req, res) {
     const success = () => {
         res.status(200).json();
     };
+
+    if (component.type !== 'event') return notAuthorizedError();
 
     Promise.all([deviceType, eventType])
         .then(([deviceType, eventType]) =>

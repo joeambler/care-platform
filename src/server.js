@@ -5,8 +5,10 @@ const app = require('express')();
 const userController = require('./api/controllers/users');
 const componentController = require('./api/controllers/components');
 const demoClient = require('./democlient/client');
-const url = require('url');
+const pug = require("pug");
 const fs = require('fs');
+const YAML = require('yamljs');
+const swaggerUi = require('swagger-ui-express');
 
 module.exports = app; // for testing
 
@@ -25,13 +27,8 @@ const baseURL = process.env.NODE_ENV === 'production'?
 const specPath = __dirname + '/api/swagger/swagger.yaml';
 
 //DOCS
-// noinspection NpmUsedModulesInstalled
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yamljs');
-const pug = require("pug");
-const swaggerDocument = YAML.load(specPath);
-
-swaggerDocument.host = baseURL;
+serveUI(specPath, baseURL, '/api-docs');
+//END DOCS
 
 app.use('/spec.json', (req, res) => res.json(swaggerDocument));
 app.use('/spec.yaml', (req, res) => {
@@ -42,10 +39,9 @@ app.use('/spec.yaml', (req, res) => {
 });
 app.use('/democlient', (req, res) =>  demoClient.getUI(res));
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get('/', (req, res) => res.send(pug.renderFile('./src/views/index.pug', {url: activeProtocol +baseURL})));
-//END DOCS
+
 
 SwaggerExpress.create(config, function(err, swaggerExpress) {
     if (err) {
@@ -80,3 +76,10 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
 
 const activeProtocol = "http://";
 console.log(activeProtocol + baseURL);
+
+
+function serveUI(yamlDocumentPath, baseURL, url){
+    const swaggerDocument = YAML.load(specPath);
+    swaggerDocument.host = baseURL;
+    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+}

@@ -4,7 +4,7 @@ const emailValidator = require("email-validator");
 const models = require('../models/index');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const emailManager = require('../utils/email');
 
 module.exports = {
     createUser: createUser,
@@ -226,7 +226,6 @@ function validCredentials(userEmail, userPassword, validCallback, invalidCallbac
 }
 
 function sendPasswordResetEmail(req, res) {
-    let senderAccount = req.app.get('EmailAccount');
     const userEmail = req.swagger.params.body.value.email;
 
     const randomstring = require("randomstring");
@@ -254,8 +253,7 @@ function sendPasswordResetEmail(req, res) {
         let resetCode = randomstring.generate(15);
 
         addResetCode(user, resetCode, serverErrorCallback);
-        sendEmail(senderAccount, user.email, resetCode, successCallback, serverErrorCallback);
-
+        sendResetCodeEmail(req.app ,user.email, resetCode, successCallback, serverErrorCallback);
     }, notFoundErrorCallback);
 }
 
@@ -383,7 +381,6 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
                     req.User = user;
                     callback();
                 }, unauthorizedCallback);
-
             }
         });
     } else {
@@ -391,29 +388,12 @@ function verifyJWT(req, authOrSecDef, scopesOrApiKey, callback) {
     }
 }
 
-function sendEmail(senderAccount, emailAddress, code, successCallback, errorCallback) {
-    let transporter = nodemailer.createTransport({
-        host: senderAccount.server,
-        port: 465,
-        secure: true,
-        auth: {
-            user: senderAccount.email,
-            pass: senderAccount.password
-        }
-    });
-
-    let mailOptions = {
-        from: 'Care Platform Account Management <noreply@ambler.me>', // sender address
-        to: emailAddress, // list of receivers
-        subject: 'Password Reset Code', // Subject line
-        text: 'Use the following code to reset your password:\n' + code // plain text body
+function sendResetCodeEmail(app, email, code, successCallback, errorCallback){
+    const message = {
+        to: email,
+        subject: 'Password Reset Code',
+        text: 'Use the following code to reset your password:\n' + code
     };
-
-    transporter.sendMail(mailOptions, (err) => {
-        if (err) {
-            errorCallback(err);
-        } else {
-            successCallback();
-        }
-    });
+    emailManager.sendEmail(app, message, successCallback, errorCallback)
 }
+
