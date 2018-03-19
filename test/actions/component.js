@@ -9,22 +9,28 @@ const UserController = require('../../src/api/controllers/users.js');
 const EventsController = require('../../src/api/controllers/events.js');
 const ComponentController = require('../../src/api/controllers/components');
 const PermissionsController = require('../../src/api/controllers/permissions');
+const EchoServiceComponent = require('../../src/serviceComponent/echo');
+const url = require('url');
 
 const SilentAction = HelperFunctions.SilentAction;
 const RecordedAction = HelperFunctions.RecordedAction;
 
-const component = TestVariables.newEventComponent;
+const eventComponent = TestVariables.newEventComponent;
 const event = TestVariables.newEvent;
 const pillBoxPermissions = TestVariables.pillBoxPermissions;
-const permissionsRequested = TestVariables.permissionsRequested;
+const eventPermissionsRequested = TestVariables.eventPermissionsRequested;
+const pillBoxEventPermission = TestVariables.pillBoxEventPermission;
+
+const currentEndpoint = require('../../src/server').get('currentEndpoint');
+const alertComponent = TestVariables.newAlertComponent(url.resolve(currentEndpoint, '../serviceComponent/v0'));
+
 module.exports = {
-    getTestComponent: () => component,
+    getTestEventComponent: () => eventComponent,
     getTestEvent: () => event,
-    getPermissionsRequested: () => permissionsRequested,
+    getPermissionsRequested: () => eventPermissionsRequested,
 
     executeActions: (variables, callback) =>
         HelperFunctions.executeActions(variables, getActions(), callback),
-
 };
 
 function getActions() {
@@ -32,24 +38,45 @@ function getActions() {
         new SilentAction(UserManagementActions.createUser),
         new SilentAction(UserManagementActions.loginUser, UserManagementActions.loginJsonHandler),
         new SilentAction(ClientManagementActions.createClient, ClientManagementActions.saveClientIDJsonHandler),
-        new RecordedAction(createComponent, componentJsonHandler),
+        new RecordedAction(createEventComponent, eventComponentJsonHandler),
         new RecordedAction(getComponent),
         new RecordedAction(postEventNoKey),
         new RecordedAction(postEvent),
-        new RecordedAction(requestPermissions),
+        new RecordedAction(requestEventPermissions),
         new RecordedAction(postEvent),
-        new RecordedAction(getRequestedPermissions),
-        new RecordedAction(acceptPermissions),
+        new RecordedAction(getRequestedEventPermissions),
+        new RecordedAction(acceptEventPermissions),
+        //BEGIN ADDED
+        new RecordedAction(createAlertComponent, alertComponentJsonHandler),
+        new SilentAction(triggerServiceClientPermissionsRequest),
+        new RecordedAction(acceptAlertPermissions),
+        //END ADDED
         new RecordedAction(postEvent),
-        new RecordedAction(revokePermissions),
+        new SilentAction(pause),
+        //GET EVENT
+        //GET ECHO
+        new RecordedAction(revokeEventPermissions),
         new RecordedAction(postEvent),
-        new RecordedAction(deleteComponent),
+        new RecordedAction(deleteEventComponent),
         new SilentAction(ClientManagementActions.deleteClient),
         new SilentAction(UserManagementActions.deleteUser)
     ]
 }
 
-function createComponent(response, callback) {
+function pause(response, callback){
+    console.log("Pausing");
+    setTimeout(callback,3000);
+}
+
+function createEventComponent(response, callback){
+    createComponent(response, callback, eventComponent)
+}
+
+function createAlertComponent(response, callback){
+    createComponent(response, callback, alertComponent)
+}
+
+function createComponent(response, callback, component) {
     const req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
@@ -68,7 +95,7 @@ function getComponent(response, callback) {
             value: response.variables.clientID
         },
         componentID: {
-            value: response.variables.componentID
+            value: response.variables.eventComponentID
         }
     });
     req.res = HelperFunctions.resSkeleton(response, callback);
@@ -82,7 +109,7 @@ function postEvent(response, callback) {
         }
     });
     req.res = HelperFunctions.resSkeleton(response, callback);
-    ComponentController.authenticateComponent(req, null, response.variables.componentKey, () => EventsController.postEvent(req, req.res));
+    ComponentController.authenticateComponent(req, null, response.variables.eventComponentKey, () => EventsController.postEvent(req, req.res));
 }
 
 function postEventNoKey(response, callback) {
@@ -95,54 +122,75 @@ function postEventNoKey(response, callback) {
     ComponentController.authenticateComponent(req, null, "   ", () => EventsController.postEvent(req, req.res));
 }
 
-function requestPermissions(response, callback) {
+function requestEventPermissions(response, callback) {
     const req = HelperFunctions.reqSkeleton({
         body: {
             value: pillBoxPermissions
         }
     });
     req.res = HelperFunctions.resSkeleton(response, callback);
-    ComponentController.authenticateComponent(req, null, response.variables.componentKey, () => PermissionsController.requestPermissions(req, req.res));
+    ComponentController.authenticateComponent(req, null, response.variables.eventComponentKey, () => PermissionsController.requestPermissions(req, req.res));
 }
 
-function deleteComponent(response, callback) {
+function deleteEventComponent(response, callback) {
+    deleteComponent(response, callback, response.variables.eventComponentID);
+}
+
+function deleteAlertComponent(response, callback) {
+    deleteComponent(response, callback, response.variables.alertComponentID);
+}
+
+function deleteComponent(response, callback, eventComponentID) {
     const req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         },
         componentID: {
-            value: response.variables.componentID
+            value: eventComponentID
         }
     });
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => ComponentController.deleteComponentById(req, req.res));
 }
 
-function componentJsonHandler (json, variables)  {
-    variables.componentID = json.id;
-    variables.componentKey = json.key;
+function eventComponentJsonHandler (json, variables)  {
+    variables.eventComponentID = json.id;
+    variables.eventComponentKey = json.key;
 }
 
-function getRequestedPermissions(response, callback) {
+function alertComponentJsonHandler (json, variables)  {
+    variables.alertComponentID = json.id;
+    variables.alertComponentKey = json.key;
+}
+
+function getRequestedEventPermissions(response, callback) {
     const req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         },
         componentID: {
-            value: response.variables.componentID
+            value: response.variables.eventComponentID
         }
     });
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => PermissionsController.getRequestedPermissions(req, req.res));
 }
 
-function acceptPermissions(response, callback) {
+function acceptEventPermissions(response, callback) {
+    acceptPermissions(response, callback, response.variables.eventComponentID, eventPermissionsRequested)
+}
+
+function acceptAlertPermissions(response, callback) {
+    acceptPermissions(response, callback, response.variables.alertComponentID, response.variables.alertPermissionsRequested)
+}
+
+function acceptPermissions(response, callback, componentID, permissionsRequested) {
     const req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         },
         componentID: {
-            value: response.variables.componentID
+            value: componentID
         },
         body: {
             value: permissionsRequested
@@ -152,18 +200,25 @@ function acceptPermissions(response, callback) {
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => PermissionsController.acceptPermissions(req, req.res));
 }
 
-function revokePermissions(response, callback) {
+function revokeEventPermissions(response, callback) {
     const req = HelperFunctions.reqSkeleton({
         clientID: {
             value: response.variables.clientID
         },
         componentID: {
-            value: response.variables.componentID
+            value: response.variables.eventComponentID
         },
         body: {
-            value: permissionsRequested
+            value: eventPermissionsRequested
         }
     });
     req.res = HelperFunctions.resSkeleton(response, callback);
     UserController.verifyJWT(req, null, "Bearer " + response.variables.JWT, () => PermissionsController.revokePermissions(req, req.res));
+}
+
+function triggerServiceClientPermissionsRequest(response, callback){
+    EchoServiceComponent.requestPermissions(response.variables.alertComponentKey, pillBoxEventPermission, pr => {
+        response.variables.alertPermissionsRequested = pr;
+        setTimeout(callback, 3000);
+    });
 }

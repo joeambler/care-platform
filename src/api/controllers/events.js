@@ -1,6 +1,7 @@
 'use strict';
 
 const models = require('../models/index');
+const fetch = require('node-fetch');
 
 module.exports = {
     postEvent: postEvent,
@@ -119,7 +120,7 @@ function postEvent(req, res) {
         .then(([deviceType, eventType]) =>
             saveNewEvent(component, deviceType, eventType, eventDetails, deviceProperties)
                 .then((e) =>
-                    forwardEvent(e[0])
+                    forwardEvent(component, e[0])
                         .then(success)
                         .catch(serverError)
                 )
@@ -146,10 +147,94 @@ function createAndAssociateDeviceInstance(t, e, deviceType, deviceProperties) {
             e.setDeviceInstance(di, {transaction: t})]));
 }
 
-function forwardEvent(event) {
+function forwardEvent(component, event) {
     return new Promise((fulfill, reject) => {
-        fulfill();
-        //TODO: Forward event to the relevant modelling components
+        Promise.all(
+            [
+                component.getClient(),
+                event.getEventType()
+            ])
+            .then(([client, eventType]) => {
+                getComponentsSubscribedToEvent(client, eventType)
+                    .then(subscribedComponents => {
+                        sendEventToComponents(subscribedComponents, component, event);
+                        fulfill();
+                    })
+                    .catch(reject);
+            })
+            .catch(reject);
+    });
+}
+
+//Decouple from response
+function sendEventToComponents(components, sender, event) {
+    const promises = components.map(component =>
+        sendEventToComponent(component, sender, event)
+    );
+    Promise.all(promises)
+        .then(() => console.log("Event forwarded to all endpoints"))
+        .catch((e) => console.log("Event forwarding error: " + e));
+}
+
+function sendEventToComponent(component, sender, event) {
+    return new Promise((fulfill, reject) => {
+        Promise.all([event.getEventType(), event.getDeviceInstance({include: models.DeviceType})])
+            .then(([eventType, deviceInstance]) => {
+                const jsonEvent = {
+                    component: sender.name,
+                    date: event.date,
+                    type: eventType.type,
+                    details: event.details,
+                    deviceInstance: {
+                        type: deviceInstance.DeviceType.type,
+                        properties: deviceInstance.properties
+                    }
+                };
+                const body = {
+                    key: component.key,
+                    event: jsonEvent
+                };
+                console.log(component.apiEndPoint+"/events");
+                fetch(component.apiEndPoint+"/events", {
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: {'Content-Type': 'application/json'},
+                })
+                    .then(res => {
+                        console.log(res.status);
+                        (res.status === 200 ? fulfill : reject)();
+                    })
+                    .catch(reject);
+            })
+            .catch(reject);
+        return;
+    });
+}
+
+function getComponentsSubscribedToEvent(client, eventType) {
+    return new Promise((fulfill, reject) => {
+        client.getComponents({
+            where: {
+                type: 'model'
+            },
+            include: {
+                model: models.Permission,
+                where: {
+                    type: 'event',
+                    tentative: false,
+                },
+                include: models.EventType
+            }
+        })
+            .then(components => {
+                const subscribedComponents = components.filter(c =>
+                    c.Permissions.filter(p =>
+                        p.EventType.id === eventType.id
+                    ).length > 0
+                );
+                fulfill(subscribedComponents);
+            })
+            .catch(reject);
     });
 }
 

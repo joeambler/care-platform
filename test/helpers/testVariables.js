@@ -42,6 +42,14 @@ module.exports = {
         name: "Pill Box"
     },
 
+    newAlertComponent: (endpoint) => {
+        return {
+            type: "model",
+            name: "Echo Component",
+            apiEndPoint: endpoint
+        }
+    },
+
     newEvent: {
         type: "Opened",
         details: "The pill box was opened",
@@ -63,10 +71,12 @@ module.exports = {
         ]
     },
 
-    permissionsRequested: [
+    eventPermissionsRequested: [
         pillBoxDevicePermission,
         pillBoxEventPermission
-    ]
+    ],
+
+    pillBoxEventPermission: pillBoxEventPermission
 
 };
 

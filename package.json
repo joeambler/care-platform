@@ -37,6 +37,7 @@
     "fs-extra": "^5.0.0",
     "jsonwebtoken": "latest",
     "mysql2": "^1.5.1",
+    "node-fetch": "^2.1.1",
     "nodemailer": "^4.4.2",
     "pug": "^2.0.1",
     "randomstring": "^1.1.5",

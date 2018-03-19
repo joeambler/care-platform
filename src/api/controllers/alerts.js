@@ -143,9 +143,13 @@ function getEmails(component) {
 
 function sendNotification(app, component, alertType, alert, email) {
     return new Promise((fulfill, reject) => {
+        if (email[0].includes('@example.com')) {
+            fulfill(); //Don't send to example domain
+            return;
+        }
         const message = {
             to: email,
-            subject: 'Care Platform Alert: '+ alertType.type ,
+            subject: 'Care Platform Alert: '+ alertType.type,
             text: "The component " + component.name + " has sent the alert '" +
             alertType.type + "'\n Details are: \n " + alert.details
         };

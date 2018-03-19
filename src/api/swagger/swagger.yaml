@@ -955,7 +955,7 @@ paths:
           description: 'The component key you supplied is invalid, or the user has not granted the required
           permissions to post this event.'
 
-  /components/alert:
+  /components/alerts:
     x-swagger-router-controller: alerts
     post:
       security:

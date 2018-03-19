@@ -1,7 +1,7 @@
 'use strict';
 
 const HelperFunctions = require('./helpers/helperFunctions.js');
-const EventComponentActions = require("./actions/eventComponent.js");
+const EventComponentActions = require("./actions/component.js");
 
 module.exports = {
     setUp: function (callback) {
@@ -14,8 +14,8 @@ module.exports = {
     eventComponentTests: function (test) {
         test.equals(this.responses[0].status, 201, "Component should be created successfully");
         test.equals(this.responses[1].status, 200, "Should be able to get component successfully");
-        test.equals(this.responses[1].json.type, EventComponentActions.getTestComponent().type, "Component type should match");
-        test.equals(this.responses[1].json.name, EventComponentActions.getTestComponent().name, "Component name should match");
+        test.equals(this.responses[1].json.type, EventComponentActions.getTestEventComponent().type, "Component type should match");
+        test.equals(this.responses[1].json.name, EventComponentActions.getTestEventComponent().name, "Component name should match");
         test.equals(this.responses[2].status, 401, "No key should return unauthorized");
         test.equals(this.responses[3].status, 401, "No permissions should return unauthorized");
         test.equals(this.responses[4].status, 200, "Permissions should be sent successfully");
@@ -33,10 +33,11 @@ module.exports = {
         });
         test.ok(match, "Permissions requested should match");
         test.equals(this.responses[7].status, 200, "Should be able to accept requested permissions");
-        test.equals(this.responses[8].status, 200, "Event should now be posted successfully");
-        test.equals(this.responses[9].status, 200, "Should be able to revoke accepted permissions");
-        test.equals(this.responses[10].status, 401, "Posting an event should now return unauthorized");
-        test.equals(this.responses[11].status, 200, "Component should be deleted successfully");
+
+        test.equals(this.responses[10].status, 200, "Event should now be posted successfully");
+        test.equals(this.responses[11].status, 200, "Should be able to revoke accepted permissions");
+        test.equals(this.responses[12].status, 401, "Posting an event should now return unauthorized");
+        test.equals(this.responses[13].status, 200, "Component should be deleted successfully");
         test.done();
     }
 };

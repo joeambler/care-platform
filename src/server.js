@@ -9,10 +9,17 @@ const pug = require("pug");
 const fs = require('fs');
 const YAML = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
+const activeProtocol = "http://";
+app.use(bodyParser.json());
+
+const baseURL = process.env.NODE_ENV === 'production'?
+    process.env.HOST
+    : 'localhost:10010';
+
+app.set('currentEndpoint', activeProtocol + baseURL + "/v0");
 
 module.exports = app; // for testing
-app.use(bodyParser.json());
 
 const config = {
   appRoot: __dirname, // required config
@@ -21,11 +28,6 @@ const config = {
         componentAuth: componentController.authenticateComponent
     }
 };
-
-const baseURL = process.env.NODE_ENV === 'production'?
-    process.env.HOST
-    : 'localhost:10010';
-
 const specPath = __dirname + '/api/swagger/swagger.yaml';
 const serviceSpecPath = __dirname + '/serviceComponent/swagger/swagger.yaml';
 
@@ -71,7 +73,6 @@ SwaggerExpress.create(config, function(err, swaggerExpress) {
 
 app.post('/serviceComponent/v0/events', (req, res) => require('./serviceComponent/echo').postEvent(req, res));
 
-const activeProtocol = "http://";
 console.log(activeProtocol + baseURL);
 
 
