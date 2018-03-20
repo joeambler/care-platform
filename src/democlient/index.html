@@ -17,147 +17,147 @@
             crossorigin="anonymous"></script>
 
     <script>
-        const host = "care.ambler.me";
-        const credentials = {};
-        let jwt;
-        let savedClientID;
-        let savedComponentID;
+      const host = 'care.ambler.me'
+      const credentials = {}
+      let jwt
+      let savedClientID
+      let savedComponentID
 
+      function dologin (callback) {
+        const xhttp = new XMLHttpRequest()
 
+        xhttp.onreadystatechange = function () {
+          if (this.readyState === 4) {
+            if (this.status === 200) {
+              const res = JSON.parse(this.responseText)
+              jwt = res.token
+              callback()
+            } else {
+              //Invalid Password
+              location.reload()
+            }
+          }
+        }
+        xhttp.open('POST', 'http://' + host + '/v0/users/login', true)
+        xhttp.setRequestHeader('accept', 'application/json')
+        xhttp.setRequestHeader('Content-type', 'application/json')
+        xhttp.send(JSON.stringify(credentials))
+      }
 
-        function dologin(callback) {
-            const xhttp = new XMLHttpRequest();
+      function getClients () {
+        const xhttp = new XMLHttpRequest()
 
-            xhttp.onreadystatechange = function () {
-                if (this.readyState === 4) {
-                    if (this.status === 200) {
-                        const res = JSON.parse(this.responseText);
-                        jwt = res.token;
-                        callback();
-                    } else {
-                        //Invalid Password
-                        location.reload();
-                    }
-                }
-            };
-            xhttp.open("POST", "http://" + host + "/v0/users/login", true);
-            xhttp.setRequestHeader("accept", "application/json");
-            xhttp.setRequestHeader("Content-type", "application/json");
-            xhttp.send(JSON.stringify(credentials));
+        xhttp.onreadystatechange = function () {
+          if (this.readyState === 4) {
+            const res = JSON.parse(this.responseText)
+            res.forEach(c => {
+              $('#clientDropdownItems').append(
+                option(c.name.title + ' ' + c.name.firstNames + ' ' + c.name.surnames, c.id, 'setClient'))
+            })
+            $('#clientDropdownLabel').text('Select Client')
+          }
+        }
+        xhttp.open('GET', 'http://' + host + '/v0/users/me/clients', true)
+        xhttp.setRequestHeader('accept', 'application/json')
+        xhttp.setRequestHeader('Content-type', 'application/json')
+        xhttp.setRequestHeader('X-API-Key', 'Bearer ' + jwt)
+        xhttp.send()
+      }
+
+      function setClient (clientID) {
+        $('#clientDropdown').fadeOut()
+        savedClientID = clientID
+        getComponents()
+      }
+
+      function getComponents () {
+        const xhttp = new XMLHttpRequest()
+
+        xhttp.onreadystatechange = function () {
+          if (this.readyState === 4) {
+            const res = JSON.parse(this.responseText)
+            res.forEach(c => {
+              $('#componentDropdownItems').append(
+                option(c.name, c.id, 'setComponent'))
+            })
+            $('#componentDropdownLabel').text('Select Component')
+            $('#componentDropdown').fadeIn()
+          }
+        }
+        xhttp.open('GET', 'http://' + host + '/v0/clients/' + savedClientID + '/components', true)
+        xhttp.setRequestHeader('accept', 'application/json')
+        xhttp.setRequestHeader('Content-type', 'application/json')
+        xhttp.setRequestHeader('X-API-Key', 'Bearer ' + jwt)
+
+        xhttp.send()
+
+      }
+
+      function setComponent (componentID) {
+        $('#componentDropdown').fadeOut()
+        savedComponentID = componentID
+        getEvents()
+
+      }
+
+      function option (label, number, callback) {
+        return '<a class="dropdown-item" onclick="' + callback + '(' + number + ')">' + label + '</a>'
+      }
+
+      function getEvents () {
+        const xhttp = new XMLHttpRequest()
+
+        xhttp.onreadystatechange = function () {
+          if (this.readyState === 4) {
+            if (this.status !== 200) {
+              $('#JWTExpired').fadeIn()
+              setTimeout(function () {$('#JWTExpired').fadeOut()}, 5000)
+              return dologin(getEvents)
+            }
+            $('#tablebody').empty()
+            const res = JSON.parse(this.responseText)
+            res.reverse().forEach(e => {
+              //alert(JSON.stringify(e));
+              $('#tablebody').append(tableEntry(e.date, e.type, e.details, JSON.parse(e.deviceInstance.properties)))
+            })
+            $('#eventsTable').fadeIn()
+            setTimeout(getEvents, 3000)
+
+          }
         }
 
-        function getClients() {
-            const xhttp = new XMLHttpRequest();
+        xhttp.open('GET', 'http://' + host + '/v0/clients/' + savedClientID + '/components/' + savedComponentID +
+          '/events', true)
+        xhttp.setRequestHeader('accept', 'application/json')
+        xhttp.setRequestHeader('Content-type', 'application/json')
+        xhttp.setRequestHeader('X-API-Key', 'Bearer ' + jwt)
 
-            xhttp.onreadystatechange = function () {
-                if (this.readyState === 4) {
-                    const res = JSON.parse(this.responseText);
-                    res.forEach(c => {
-                        $("#clientDropdownItems").append(
-                            option(c.name.title + " " + c.name.firstNames + " " + c.name.surnames, c.id, "setClient"));
-                    });
-                    $("#clientDropdownLabel").text("Select Client");
-                }
-            };
-            xhttp.open("GET", "http://" + host + "/v0/users/me/clients", true);
-            xhttp.setRequestHeader("accept", "application/json");
-            xhttp.setRequestHeader("Content-type", "application/json");
-            xhttp.setRequestHeader("X-API-Key", "Bearer " + jwt);
-            xhttp.send();
-        }
+        xhttp.send()
 
-        function setClient(clientID) {
-            $("#clientDropdown").fadeOut();
-            savedClientID = clientID;
-            getComponents();
-        }
+      }
 
-        function getComponents() {
-            const xhttp = new XMLHttpRequest();
+      function tableEntry (date, type, details, deviceProperties) {
+        const datetime = new Date(date)
+        const formattedProperteies = formatProperties(deviceProperties)
+        return '<tr><th scope="row">' + datetime.toLocaleString('en-GB', {timeZone: 'UTC'}) + '</th><td>' + type +
+          '</td><td>' + details + '</td><td>' + formattedProperteies + '</td></tr>'
+      }
 
-            xhttp.onreadystatechange = function () {
-                if (this.readyState === 4) {
-                    const res = JSON.parse(this.responseText);
-                    res.forEach(c => {
-                        $("#componentDropdownItems").append(
-                            option(c.name, c.id, "setComponent"));
-                    });
-                    $("#componentDropdownLabel").text("Select Component");
-                    $("#componentDropdown").fadeIn();
-                }
-            };
-            xhttp.open("GET", "http://" + host + "/v0/clients/" + savedClientID + "/components", true);
-            xhttp.setRequestHeader("accept", "application/json");
-            xhttp.setRequestHeader("Content-type", "application/json");
-            xhttp.setRequestHeader("X-API-Key", "Bearer " + jwt);
+      function formatProperties (properties) {
+        let str = '<table>'
+        Object.keys(properties).forEach(function (key) {
+          str = str + '<tr><td><b>' + key + ':</b></td><td> ' + properties[key] + '</td></tr>'
+        })
+        return str + '</table>'
+      }
 
-            xhttp.send();
-
-        }
-
-        function setComponent(componentID) {
-            $("#componentDropdown").fadeOut();
-            savedComponentID = componentID;
-            getEvents();
-
-        }
-
-        function option(label, number, callback) {
-            return "<a class=\"dropdown-item\" onclick=\"" + callback + "(" + number + ")\">" + label + "</a>";
-        }
-
-        function getEvents() {
-            const xhttp = new XMLHttpRequest();
-
-            xhttp.onreadystatechange = function () {
-                if (this.readyState === 4) {
-                    if (this.status !== 200){
-                        $('#JWTExpired').fadeIn();
-                        setTimeout(function () {$('#JWTExpired').fadeOut();},5000);
-                        return dologin(getEvents);
-                    }
-                    $("#tablebody").empty();
-                    const res = JSON.parse(this.responseText);
-                    res.reverse().forEach(e => {
-                        //alert(JSON.stringify(e));
-                        $("#tablebody").append(tableEntry(e.date, e.type, e.details, JSON.parse(e.deviceInstance.properties)));
-                    });
-                    $("#eventsTable").fadeIn();
-                    setTimeout(getEvents, 3000);
-
-                }
-            };
-
-            xhttp.open("GET", "http://" + host + "/v0/clients/"+ savedClientID+"/components/"+ savedComponentID +"/events", true);
-            xhttp.setRequestHeader("accept", "application/json");
-            xhttp.setRequestHeader("Content-type", "application/json");
-            xhttp.setRequestHeader("X-API-Key", "Bearer " + jwt);
-
-            xhttp.send();
-
-        }
-
-        function tableEntry(date, type, details, deviceProperties) {
-            const datetime = new Date(date);
-            const formattedProperteies = formatProperties(deviceProperties);
-            return "<tr><th scope=\"row\">"+ datetime.toLocaleString('en-GB', { timeZone: 'UTC' })+ "</th><td>"+type+"</td><td>"+details+"</td><td>"+ formattedProperteies+ "</td></tr>"
-        }
-
-        function formatProperties(properties){
-            let str = "<table>";
-            Object.keys(properties).forEach(function(key) {
-                str = str + "<tr><td><b>" + key + ":</b></td><td> "+ properties[key] + "</td></tr>";
-            });
-            return str + "</table>"
-        }
-
-        function login () {
-            $("#loginForm").fadeOut();
-            credentials.email = $("#email").val();
-            credentials.password = $("#password").val();
-            dologin(getClients);
-            $("#clientDropdown").fadeIn();
-        }
+      function login () {
+        $('#loginForm').fadeOut()
+        credentials.email = $('#email').val()
+        credentials.password = $('#password').val()
+        dologin(getClients)
+        $('#clientDropdown').fadeIn()
+      }
 
     </script>
 </head>
@@ -180,7 +180,7 @@
         <button type="button" onclick="return login()" class="btn btn-primary">Submit</button>
     </form>
 
-    <div id="clientDropdown" class="dropdown show"  style="display:none;">
+    <div id="clientDropdown" class="dropdown show" style="display:none;">
         <a id="clientDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Logging in...
@@ -191,9 +191,10 @@
     </div>
 
     <div id="componentDropdown" class="dropdown show" style="display:none;">
-        <a id = "componentDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+        <a id="componentDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
+           data-toggle="dropdown" aria-haspopup="true"
            aria-expanded="false">
-           Getting Components...
+            Getting Components...
         </a>
 
         <div id="componentDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">

@@ -1,80 +1,80 @@
-'use strict';
-const randomString = require("randomstring");
+'use strict'
+const randomString = require('randomstring')
 
 const pillBoxDevicePermission = {
-    type: "device",
-    name: "Pill Box"
-};
+  type: 'device',
+  name: 'Pill Box',
+}
 
 const pillBoxEventPermission = {
-    type: "event",
-    name: "Opened"
-};
+  type: 'event',
+  name: 'Opened',
+}
 
 const pillBoxDeviceDefinition = {
-    type: "Pill Box",
-    prototype: JSON.stringify({
-        location: "string"
-    })
-};
+  type: 'Pill Box',
+  prototype: JSON.stringify({
+    location: 'string',
+  }),
+}
 
 const eventComponentPermissions = [
-    pillBoxDevicePermission,
-    pillBoxEventPermission
-];
+  pillBoxDevicePermission,
+  pillBoxEventPermission,
+]
 
 module.exports = {
-    newUser: {
-        name: {
-            title: "Dr",
-            firstNames: "Grace",
-            surnames: "Hopper"
-        },
-        email: randomString.generate(50) + "@example.com",
-        password: "password"
+  newUser: {
+    name: {
+      title: 'Dr',
+      firstNames: 'Grace',
+      surnames: 'Hopper',
     },
+    email: randomString.generate(50) + '@example.com',
+    password: 'password',
+  },
 
-    newClient: {
-        name: {
-            title: "Mr",
-            firstNames: "Client",
-            surnames: "Client"
-        }
+  newClient: {
+    name: {
+      title: 'Mr',
+      firstNames: 'Client',
+      surnames: 'Client',
     },
+  },
 
-    newEventComponent: {
-        type: "event",
-        name: "Pill Box"
-    },
+  newEventComponent: {
+    type: 'event',
+    name: 'Pill Box',
+  },
 
-    newAlertComponent: (endpoint) => {
-        return {
-            type: "model",
-            name: "Echo Component",
-            apiEndPoint: endpoint
-        }
-    },
+  newAlertComponent: (endpoint) => {
+    return {
+      type: 'model',
+      name: 'Echo Component',
+      apiEndPoint: endpoint,
+    }
+  },
 
-    newEvent: {
-        type: "Opened",
-        details: "The pill box was opened",
-        deviceInstance: {
-            type: "Pill Box",
-            properties: JSON.stringify({
-                location: "Kitchen"
-            })
-        }
+  newEvent: {
+    type: 'Opened',
+    details: 'The pill box was opened',
+    deviceInstance: {
+      type: 'Pill Box',
+      properties: JSON.stringify({
+        location: 'Kitchen',
+      }),
     },
+  },
 
-    pillBoxPermissions: {
-        pillBoxEventPermission: pillBoxEventPermission,
-        withDeviceDefinitions: {
-            permissions: eventComponentPermissions,
-            deviceDefinitions: [
-                pillBoxDeviceDefinition
-            ]
-        },
-        permissionsOnly: eventComponentPermissions,
+  pillBoxPermissions: {
+    pillBoxEventPermission: pillBoxEventPermission,
+    withDeviceDefinitions: {
+      permissions: eventComponentPermissions,
+      deviceDefinitions: [
+        pillBoxDeviceDefinition,
+      ],
     },
-};
+    permissionsOnly: eventComponentPermissions,
+  },
+}
 
