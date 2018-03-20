@@ -44,4 +44,3 @@ node_modules
 !.elasticbeanstalk/*.global.yml
 
 deploy.sh
-.eslintrc.json
