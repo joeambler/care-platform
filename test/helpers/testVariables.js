@@ -76,12 +76,5 @@ module.exports = {
         },
         permissionsOnly: eventComponentPermissions,
     },
-
-
-
-
-
-
-
 };
 
