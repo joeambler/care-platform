@@ -11,7 +11,7 @@ module.exports = {
         HelperFunctions.printResponses(this.responses);
         callback();
     },
-    eventComponentTests: function (test) {
+    componentTests: function (test) {
         test.equals(this.responses[0].status, 201, "Component should be created successfully");
         test.equals(this.responses[1].status, 200, "Should be able to get component successfully");
         test.equals(this.responses[1].json.type, EventComponentActions.getTestEventComponent().type, "Component type should match");
@@ -37,7 +37,8 @@ module.exports = {
         test.equals(this.responses[10].status, 200, "Event should now be posted successfully");
         test.equals(this.responses[11].status, 200, "Should be able to revoke accepted permissions");
         test.equals(this.responses[12].status, 401, "Posting an event should now return unauthorized");
-        test.equals(this.responses[13].status, 200, "Component should be deleted successfully");
+        test.equals(this.responses[13].status, 200, "Event component should be deleted successfully");
+        test.equals(this.responses[14].status, 200, "Event component should be deleted successfully");
         test.done();
     }
 };

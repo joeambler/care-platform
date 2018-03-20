@@ -18,6 +18,11 @@ const pillBoxDeviceDefinition = {
     })
 };
 
+const eventComponentPermissions = [
+    pillBoxDevicePermission,
+    pillBoxEventPermission
+];
+
 module.exports = {
     newUser: {
         name: {
@@ -62,21 +67,21 @@ module.exports = {
     },
 
     pillBoxPermissions: {
-        permissions: [
-            pillBoxDevicePermission,
-            pillBoxEventPermission
-        ],
-        deviceDefinitions: [
-            pillBoxDeviceDefinition
-        ]
+        pillBoxEventPermission: pillBoxEventPermission,
+        withDeviceDefinitions: {
+            permissions: eventComponentPermissions,
+            deviceDefinitions: [
+                pillBoxDeviceDefinition
+            ]
+        },
+        permissionsOnly: eventComponentPermissions,
     },
 
-    eventPermissionsRequested: [
-        pillBoxDevicePermission,
-        pillBoxEventPermission
-    ],
 
-    pillBoxEventPermission: pillBoxEventPermission
+
+
+
+
 
 };
 
