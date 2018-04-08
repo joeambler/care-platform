@@ -16,12 +16,42 @@
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
 
+    <style>
+        .sentence {
+            float: left;
+            padding: 5px;
+        }
+
+        .step {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: none;
+        }
+    </style>
+
     <script>
       const host = 'care.ambler.me'
       const credentials = {}
       let jwt
       let savedClientID
       let savedComponentID
+
+      $(document).ready(function () {
+        $('#loginStep').fadeIn()
+      })
+
+      function login () {
+        credentials.email = $('#email').val()
+        credentials.password = $('#password').val()
+        dologin(function () {
+          getClients()
+          $('#loginStep').fadeOut()
+          $('#clientStep').fadeIn()
+        })
+
+      }
 
       function dologin (callback) {
         const xhttp = new XMLHttpRequest()
@@ -34,7 +64,7 @@
               callback()
             } else {
               //Invalid Password
-              location.reload()
+              showInfo('#BadLogin')
             }
           }
         }
@@ -54,7 +84,6 @@
               $('#clientDropdownItems').append(
                 option(c.name.title + ' ' + c.name.firstNames + ' ' + c.name.surnames, c.id, 'setClient'))
             })
-            $('#clientDropdownLabel').text('Select Client')
           }
         }
         xhttp.open('GET', 'http://' + host + '/v0/users/me/clients', true)
@@ -65,10 +94,12 @@
       }
 
       function setClient (clientID) {
-        $('#clientDropdown').fadeOut()
+        $('#clientStep').fadeOut()
         savedClientID = clientID
         getComponents()
       }
+
+      const componentMap = new Map()
 
       function getComponents () {
         const xhttp = new XMLHttpRequest()
@@ -76,12 +107,18 @@
         xhttp.onreadystatechange = function () {
           if (this.readyState === 4) {
             const res = JSON.parse(this.responseText)
+            componentMap.clear()
             res.forEach(c => {
-              $('#componentDropdownItems').append(
-                option(c.name, c.id, 'setComponent'))
+              componentMap.set(c.id, c)
+              if (c.type === 'event') {
+                $('#eventComponentDropdownItems').append(
+                  option(c.name, c.id, 'setComponent'))
+              } else {
+                $('#alertComponentDropdownItems').append(
+                  option(c.name, c.id, 'setComponent'))
+              }
             })
-            $('#componentDropdownLabel').text('Select Component')
-            $('#componentDropdown').fadeIn()
+            $('#componentStep').fadeIn()
           }
         }
         xhttp.open('GET', 'http://' + host + '/v0/clients/' + savedClientID + '/components', true)
@@ -94,34 +131,50 @@
       }
 
       function setComponent (componentID) {
-        $('#componentDropdown').fadeOut()
-        savedComponentID = componentID
-        getEvents()
+        clearTimeout(eventsTimeout)
+        clearTimeout(alertsTimeout)
 
+        savedComponentID = componentID
+        const c = componentMap.get(componentID)
+        const isEvent = (c.type === 'event')
+        $('#currentComponent').text('View ' + (isEvent ? 'Events' : 'Alerts') + ' from the ' + c.name + ' component:')
+        if (isEvent) {
+          getEvents()
+        } else {
+          getAlerts()
+        }
       }
 
       function option (label, number, callback) {
         return '<a class="dropdown-item" onclick="' + callback + '(' + number + ')">' + label + '</a>'
       }
 
+      function showInfo (id) {
+        $(id).fadeIn()
+        setTimeout(function () {$(id).fadeOut()}, 5000)
+      }
+
+      let eventsTimeout
+
       function getEvents () {
+        $('#alertsTable').fadeOut()
         const xhttp = new XMLHttpRequest()
 
         xhttp.onreadystatechange = function () {
           if (this.readyState === 4) {
             if (this.status !== 200) {
-              $('#JWTExpired').fadeIn()
-              setTimeout(function () {$('#JWTExpired').fadeOut()}, 5000)
+              showInfo('#JWTExpired')
               return dologin(getEvents)
             }
-            $('#tablebody').empty()
+            $('#eventsTableBody').empty()
             const res = JSON.parse(this.responseText)
             res.reverse().forEach(e => {
               //alert(JSON.stringify(e));
-              $('#tablebody').append(tableEntry(e.date, e.type, e.details, JSON.parse(e.deviceInstance.properties)))
+              $('#eventsTableBody').
+                append(eventTableEntry(e.date, e.type, e.details, JSON.parse(e.deviceInstance.properties)))
             })
             $('#eventsTable').fadeIn()
-            setTimeout(getEvents, 3000)
+            eventsTimeout = setTimeout(getEvents, 3000)
 
           }
         }
@@ -136,11 +189,49 @@
 
       }
 
-      function tableEntry (date, type, details, deviceProperties) {
+      let alertsTimeout
+
+      function getAlerts () {
+        $('#eventsTable').fadeOut()
+        const xhttp = new XMLHttpRequest()
+
+        xhttp.onreadystatechange = function () {
+          if (this.readyState === 4) {
+            if (this.status !== 200) {
+              showInfo('#JWTExpired')
+              return dologin(getAlerts)
+            }
+            $('#alertsTableBody').empty()
+            const res = JSON.parse(this.responseText)
+            res.reverse().forEach(e => {
+              $('#alertsTableBody').append(alertTableEntry(e.date, e.type, e.details))
+            })
+            $('#alertsTable').fadeIn()
+            alertsTimeout = setTimeout(getAlerts, 3000)
+          }
+        }
+
+        xhttp.open('GET', 'http://' + host + '/v0/clients/' + savedClientID + '/components/' + savedComponentID +
+          '/alerts', true)
+        xhttp.setRequestHeader('accept', 'application/json')
+        xhttp.setRequestHeader('Content-type', 'application/json')
+        xhttp.setRequestHeader('X-API-Key', 'Bearer ' + jwt)
+
+        xhttp.send()
+
+      }
+
+      function eventTableEntry (date, type, details, deviceProperties) {
         const datetime = new Date(date)
         const formattedProperteies = formatProperties(deviceProperties)
         return '<tr><th scope="row">' + datetime.toLocaleString('en-GB', {timeZone: 'UTC'}) + '</th><td>' + type +
           '</td><td>' + details + '</td><td>' + formattedProperteies + '</td></tr>'
+      }
+
+      function alertTableEntry (date, type, details) {
+        const datetime = new Date(date)
+        return '<tr><th scope="row">' + datetime.toLocaleString('en-GB', {timeZone: 'UTC'}) + '</th><td>' + type +
+          '</td><td>' + details + '</td></tr>'
       }
 
       function formatProperties (properties) {
@@ -151,69 +242,114 @@
         return str + '</table>'
       }
 
-      function login () {
-        $('#loginForm').fadeOut()
-        credentials.email = $('#email').val()
-        credentials.password = $('#password').val()
-        dologin(getClients)
-        $('#clientDropdown').fadeIn()
-      }
-
     </script>
 </head>
 <body>
+
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" href="#">Care Platform Demonstration</a>
+</nav>
+
+
 <div style="margin:100px;">
     <div id="JWTExpired" class="alert alert-info" role="alert" style="display:none">
         JSON Web Token has expired, requesting a new one...
     </div>
-    <h1>Care Platform Demonstration</h1>
+    <div id="BadLogin" class="alert alert-info" role="alert" style="display:none">
+        Invalid login information, please try again.
+    </div>
+    <h1>View Client Data</h1>
 
-    <form id="loginForm" method="POST">
-        <div class="form-group">
-            <label for="email">Email address</label>
-            <input type="email" class="form-control" id="email" placeholder="Enter email">
+    <div style="position: relative; width:100%;">
+        <!-- Login -->
+        <div id="loginStep" class="step">
+            <form id="loginForm" method="POST">
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter email">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                </div>
+                <button type="button" onclick="return login()" class="btn btn-primary">Submit</button>
+            </form>
         </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" placeholder="Password">
+
+        <!-- Select Client -->
+        <div id="clientStep" class="step">
+            <h3 class="sentence">Select a </h3>
+            <div id="clientDropdown" class="dropdown show sentence">
+                <a id="clientDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    client
+                </a>
+
+                <div id="clientDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                </div>
+            </div>
+            <h3 class="sentence">.</h3>
         </div>
-        <button type="button" onclick="return login()" class="btn btn-primary">Submit</button>
-    </form>
 
-    <div id="clientDropdown" class="dropdown show" style="display:none;">
-        <a id="clientDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
-           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Logging in...
-        </a>
+        <!-- Select Component -->
+        <div id="componentStep" class="step">
+            <h3 class="sentence">Select an </h3>
+            <div id="eventComponentDropdown" class="dropdown show sentence">
+                <a id="eventComponentDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
+                   data-toggle="dropdown" aria-haspopup="true"
+                   aria-expanded="false">
+                    event
+                </a>
 
-        <div id="clientDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <div id="eventComponentDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                </div>
+            </div>
+            <h3 class="sentence"> or </h3>
+            <div id="alertComponentDropdown" class="dropdown show sentence">
+                <a id="alertComponentDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
+                   data-toggle="dropdown" aria-haspopup="true"
+                   aria-expanded="false">
+                    alert
+                </a>
+
+                <div id="alertComponentDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                </div>
+            </div>
+            <h3 class="sentence"> component. </h3>
+
+            <div style="padding-left: 20px; padding-right:20px">
+                <div style="clear: both; padding-top:30px">
+                    <h3 id="currentComponent"></h3>
+                </div>
+
+                <table id="eventsTable" style="display: none" class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Time</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Details</th>
+                        <th scope="col">Properties</th>
+                    </tr>
+                    </thead>
+                    <tbody id="eventsTableBody">
+
+                    </tbody>
+                </table>
+
+                <table id="alertsTable" style="display: none" class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Time</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Details</th>
+                    </tr>
+                    </thead>
+                    <tbody id="alertsTableBody">
+
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-
-    <div id="componentDropdown" class="dropdown show" style="display:none;">
-        <a id="componentDropdownLabel" class="btn btn-secondary dropdown-toggle" href="#" role="button"
-           data-toggle="dropdown" aria-haspopup="true"
-           aria-expanded="false">
-            Getting Components...
-        </a>
-
-        <div id="componentDropdownItems" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-        </div>
-    </div>
-
-    <table id="eventsTable" style="display: none" class="table">
-        <thead>
-        <tr>
-            <th scope="col">Time</th>
-            <th scope="col">Type</th>
-            <th scope="col">Details</th>
-            <th scope="col">Device Properties</th>
-        </tr>
-        </thead>
-        <tbody id="tablebody">
-
-        </tbody>
-    </table>
-</div>
 </body>
 </html>
