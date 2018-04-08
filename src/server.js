@@ -30,8 +30,8 @@ const specPath = __dirname + '/api/swagger/swagger.yaml'
 const serviceSpecPath = __dirname + '/serviceComponent/swagger/swagger.yaml'
 
 //DOCS
-serveUI(specPath, baseURL, '')
 serveUI(serviceSpecPath, baseURL, '/serviceComponent')
+serveUI(specPath, baseURL, '')
 //END DOCS
 
 app.use('/democlient', (req, res) => demoClient.getUI(res))
