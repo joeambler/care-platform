@@ -8,7 +8,6 @@ const demoClient = require('./democlient/client')
 const pug = require('pug')
 const fs = require('fs')
 const YAML = require('yamljs')
-const swaggerUi = require('swagger-ui-express')
 const bodyParser = require('body-parser')
 const activeProtocol = 'http://'
 app.use(bodyParser.json())
@@ -77,6 +76,7 @@ app.post('/serviceComponent/v0/events',
 console.log(activeProtocol + baseURL)
 
 function serveUI (specPath, baseURL, url) {
+  const swaggerUi = require('swagger-ui-express')
   const swaggerDocument = YAML.load(specPath)
   swaggerDocument.host = baseURL
   app.use(url + '/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
