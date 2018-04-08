@@ -69,7 +69,7 @@ function getComponents (req, res) {
     then(clients => {
       if (clients.length < 1) return notFoundError()
       clients[0].getComponents(
-        {attributes: ['id', 'name', 'apiEndPoint', 'key']}).
+        {attributes: ['id', 'name', 'apiEndPoint', 'key', 'type']}).
         then((components) => {
           const componentObjects = []
           components.forEach(m => {
