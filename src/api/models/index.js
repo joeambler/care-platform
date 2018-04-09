@@ -9,9 +9,9 @@ const config = require(__dirname + '/../../config/config.js')[env]
 const db = {}
 
 // noinspection Annotator
-const sequelize = config.use_env_variable ? new Sequelize(
-  process.env[config.use_env_variable], config)
-  : new Sequelize(config.database, config.username, config.password, config)
+console.log(env)
+console.log(config)
+const sequelize = new Sequelize(config.database, config.username, config.password, config)
 
 fs.readdirSync(__dirname).filter(file => {
   return (file.indexOf('.') !== 0) && (file !== basename) &&
