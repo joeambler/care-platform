@@ -30,8 +30,8 @@ const specPath = __dirname + '/api/swagger/swagger.yaml'
 const serviceSpecPath = __dirname + '/serviceComponent/swagger/swagger.yaml'
 
 //DOCS
+serveUI(specPath, baseURL, '', true)
 serveUI(serviceSpecPath, baseURL, '/serviceComponent')
-serveUI(specPath, baseURL, '')
 //END DOCS
 
 app.use('/democlient', (req, res) => demoClient.getUI(res))
@@ -75,11 +75,14 @@ app.post('/serviceComponent/v0/events',
 
 console.log(activeProtocol + baseURL)
 
-function serveUI (specPath, baseURL, url) {
-  const swaggerUi = require('swagger-ui-express')
-  const swaggerDocument = YAML.load(specPath)
+function serveUI (specPath, baseURL, url, setupUI) {
+  let swaggerDocument = YAML.load(specPath)
   swaggerDocument.host = baseURL
-  app.use(url + '/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+
+  if (setupUI){
+    const swaggerUi = require('swagger-ui-express')
+    app.use(url + '/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+  }
 
   app.use(url + '/spec.json', (req, res) => res.json(swaggerDocument))
   app.use(url + '/spec.yaml', (req, res) => {
