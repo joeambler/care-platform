@@ -1,11 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Client = sequelize.define('Client', {
-    key: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
   })
 
   Client.associate = function (models) {

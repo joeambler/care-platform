@@ -50,7 +50,6 @@ function fetchUsersClients (req, res, tentative) {
 }
 
 function postUsersClients (req, res) {
-  let clientKey = randomstring.generate(128)
   let user = req.User
   const body = req.swagger.params.body.value
 
@@ -73,7 +72,6 @@ function postUsersClients (req, res) {
   const createClient = name => {
     return models.Client.create({
       nameId: name.id,
-      key: clientKey,
     })
   }
 
