@@ -65,7 +65,7 @@ function getComponents (req, res) {
     res.status(404).json()
   }
 
-  user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).
+  user.getClients({where: {id: clientId}, through: {where: {admin: true, tentative:false}}}).
     then(clients => {
       if (clients.length < 1) return notFoundError()
       clients[0].getComponents(
@@ -95,7 +95,7 @@ function getComponentById (req, res) {
   }
 
   // noinspection Annotator
-  user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).
+  user.getClients({where: {id: clientId}, through: {where: {admin: true, tentative:false}}}).
     then(clients => {
       if (clients.length < 1) return notFoundError()
       clients[0].getComponents({
@@ -124,7 +124,7 @@ function deleteComponentById (req, res) {
     res.status(404).json()
   }
 
-  user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).
+  user.getClients({where: {id: clientId}, through: {where: {admin: true, tentative:false}}}).
     then(clients => {
       if (clients.length < 1) return notFoundError()
       clients[0].getComponents({where: {id: componentID}}).then(components => {

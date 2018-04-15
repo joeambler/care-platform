@@ -254,7 +254,7 @@ function getComponentPermissionsREST (req, res, tentative) {
     res.status(404).json()
   }
 
-  user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).
+  user.getClients({where: {id: clientId}, through: {where: {admin: true, tentative:false}}}).
     then(clients => {
       if (clients.length < 1) {
         return notFoundError()
@@ -295,7 +295,7 @@ function changePermissionStatusREST (req, res, setTentative) {
     res.status(404).json()
   }
 
-  user.getClients({where: {id: clientId}, through: {where: {admin: true}}}).
+  user.getClients({where: {id: clientId}, through: {where: {admin: true, tentative:false}}}).
     then(clients => {
       if (clients.length < 1) {
         return notFoundError()

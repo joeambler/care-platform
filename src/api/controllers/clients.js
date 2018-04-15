@@ -235,6 +235,7 @@ function deleteClient (req, res) {
       if (client == null) return notFoundError(
         'User does have a client with this ID')
       if (!client.UserClient.admin) return unauthorizedError()
+      if (client.UserClient.tentative) return unauthorizedError()
 
       client.setUsers([]).then(() => {
         client.destroy().then(() => {
@@ -278,6 +279,7 @@ function shareClient (req, res) {
     if (client == null) return notFoundError(
       'User does have a client with this ID')
     if (!client.UserClient.admin) return unauthorizedError()
+    if (client.UserClient.tentative) return unauthorizedError()
 
     models.User.findOne({where: {email: emailToShareWith}}).
       then(userToShareWith => {

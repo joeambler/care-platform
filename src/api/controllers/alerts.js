@@ -34,7 +34,7 @@ function getAlerts (res, user, clientId, limitComponent, componentID) {
     res.status(404).json()
   }
 
-  user.getClients({where: {id: clientId}}).then(clients => {
+  user.getClients({where: {id: clientId}, through: {where: {tentative:false}}}).then(clients => {
     if (clients.length < 1) {
       return notFoundError()
     }

@@ -29,7 +29,7 @@ function getEvents (res, user, clientId, limitComponent, componentID) {
   const notFoundError = () => res.status(404).json()
   const success = (jsonOutputFlat) => res.status(200).json(jsonOutputFlat)
 
-  user.getClients({where: {id: clientId}}).then(clients => {
+  user.getClients({where: {id: clientId}, through: {where: {tentative:false}}}).then(clients => {
     if (clients.length < 1) {
 
       return notFoundError()
