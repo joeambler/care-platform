@@ -34,12 +34,17 @@ function requestPermissions (req, res) {
   const permissions = body.permissions
 
   const checks = [
+    hasValidPrototypes(deviceDefinitions),
     permissionAndDevicesMatch(deviceDefinitions, permissions),
     getDefinitionConflicts(deviceDefinitions),
     getComponentPermissionsFlat(component, null, false)]
 
   Promise.all(checks).
-    then(([match, devicesComparison, existingPermissions]) => {
+    then(([validPrototypes, match, devicesComparison, existingPermissions]) => {
+      if (!validPrototypes) {
+        console.log('Badly written prototypes')
+        return devicesError([])
+      }
 
       if (!match) {
         console.log('Badly defined device permissions/definitions')
@@ -110,6 +115,24 @@ function getComponentPermissionsFlat (component, tentative, includeOriginal) {
 
       fulfill(flatPermissions)
     }, reject)
+  })
+}
+
+function hasValidPrototypes (deviceDefinitions){
+  return new Promise((fulfill) => {
+    const possibleTypes = ["string", "number", "boolean"]
+
+    let prototypes = deviceDefinitions.map(d => d.prototype)
+
+    prototypes.map(x => JSON.parse(x)).forEach(prototype => {
+      Object.keys(prototype).forEach(p => {
+        if (!possibleTypes.includes(prototype[p])){
+          return fulfill(false)
+        }
+      })
+    })
+
+    return fulfill(true)
   })
 }
 
